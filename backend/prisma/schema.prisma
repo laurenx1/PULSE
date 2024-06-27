@@ -19,6 +19,9 @@ model User {
   saved          Int[]
   preferredTopics String[]
   interactions   Interaction[] // This line establishes the reverse relation
+  email          String        @unique
+  username       String        @unique
+  password       String
 }
 
 model Article {
