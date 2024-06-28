@@ -7,7 +7,7 @@ const LandingPage = () => {
     const navigate = useNavigate();
 
     const handleShowSignIn = () => {
-        navigate(`/login`)
+        navigate(`/login`);
     };
     return (
         <div>
