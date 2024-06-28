@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("SUPABASE_URL")
+}
+
+model User {
+  id             Int           @id @default(autoincrement())
+  liked          Int[]
+  saved          Int[]
+  preferredTopics String[]
+  interactions   Interaction[] // establishes the reverse relation
+  email          String        @unique
+  username       String        @unique
+  password       String
+}
+
+model Article {
+  id          Int           @id @default(autoincrement())
+  title       String
+  content     String
+  url         String
+  topics      String[]
+  publishedAt DateTime
+  interactions Interaction[] // establishes the reverse relation
+}
+
+model Interaction {
+  userId    Int
+  articleId Int
+  clicked   Boolean
+  timeSpent Int
+  user      User   @relation(fields: [userId], references: [id])
+  article   Article @relation(fields: [articleId], references: [id])
+  @@id([userId, articleId])
+}
