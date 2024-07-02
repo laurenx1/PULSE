@@ -1,8 +1,16 @@
 import React from 'react';
 import './UserProfile.css';
+import { useNavigate } from 'react-router-dom';
 
 const UserProfile = ({ user }) => {
     const { username, preferredTopics, liked, saved } = user;
+
+    const navigate = useNavigate(); 
+
+    const handleSelectTopics = () => {
+        navigate(`/${user.id}/topics`)
+    };
+
 
     return (
         <div className="profile-container">
@@ -39,7 +47,7 @@ const UserProfile = ({ user }) => {
                             {topic}
                         </div>
                     ))}
-                    <button className="edit-interests-button">Edit your interests</button>
+                    <button className="edit-interests-button" onClick={handleSelectTopics}>Edit your interests</button>
                 </div>
             </div>
         </div>
