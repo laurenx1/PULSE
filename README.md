@@ -15,3 +15,4 @@
 .env file should have SUPABASE_URL which is postgres uri for database, SUPABASE_KEY which is client key for database, and SUPA_URL which is the https URL to database.
 
 ```node index.js``` to run backend server
+
