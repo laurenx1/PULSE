@@ -10,10 +10,12 @@ const LandingPage = () => {
         navigate(`/login`);
     };
     return (
-        <div>
-        <h1>PULSE</h1>
-        <p>Welcome to PULSE!</p>
-        <button onClick={handleShowSignIn}>Sign In/Log In</button>
+        <div className="container mx-auto px-4 flex justify-center items-center h-screen">
+            <article className="prose text-center">
+                <h1>PULSE</h1>
+                <p>Welcome to PULSE!</p>
+                <button className="btn btn-primary" onClick={handleShowSignIn}>Sign In/Log In</button>
+            </article>
         </div>
     );
 };
