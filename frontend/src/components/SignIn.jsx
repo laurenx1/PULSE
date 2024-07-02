@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 const SignIn = ( {setUser} ) => {
     const [email, setEmail] = useState('');
@@ -20,34 +21,36 @@ const SignIn = ( {setUser} ) => {
         try {
             if (isSignUp) {
                 // Handle sign up
-                const response = await fetch(import.meta.env.VITE_BACKEND_URL + '/api/register', {
-                    method: 'POST',
+                const response = await axios.post(import.meta.env.VITE_BACKEND_URL + '/api/register', {
+                    email,
+                    username,
+                    password
+                }, {
                     headers: {
-                    'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email, username, password }),
+                        'Content-Type': 'application/json',
+                    }
                 });
-                const data = await response.json();
+                const data = response.data;
                 console.log(data); // Handle response accordingly
-                handleVerifiedAccount(); 
-                } else {
+                handleVerifiedAccount();
+            } else {
                 // Handle login
-                const response = await fetch(import.meta.env.VITE_BACKEND_URL + '/api/login', {
-                    method: 'POST',
+                const response = await axios.post(import.meta.env.VITE_BACKEND_URL + '/api/login', {
+                    email,
+                    password
+                }, {
                     headers: {
-                    'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email, password }),
+                        'Content-Type': 'application/json',
+                    }
                 });
-                const data = await response.json();
+                const data = response.data;
                 console.log(data); // Handle response accordingly
-                handleVerifiedAccount(data.user); 
-                }
-
-            } catch (error) {
-                console.error('Error logging in or signing up', error);
+                handleVerifiedAccount(data.user);
             }
+        } catch (error) {
+            console.error('Error logging in or signing up', error);
         }
+    };
     
 
     return (
