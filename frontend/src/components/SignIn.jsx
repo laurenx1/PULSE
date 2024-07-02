@@ -8,7 +8,7 @@ const SignIn = ( {setUser} ) => {
     const [username, setUsername] = useState('');
     const [isSignUp, setIsSignUp] = useState(true); // Start with sign up mode
 
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
 
     function handleVerifiedAccount (user) {
         navigate(`/profile/${user.id}`);
@@ -51,10 +51,10 @@ const SignIn = ( {setUser} ) => {
             console.error('Error logging in or signing up', error);
         }
     };
-    
+
 
     return (
-        <form onSubmit={handleSubmit}>
+        <form className="container mx-auto flex flex-col justify-center items-center h-screen" onSubmit={handleSubmit}>
         <label>
             Email:
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -69,7 +69,7 @@ const SignIn = ( {setUser} ) => {
             <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
             </label>
         )}
-        <button type="submit">{isSignUp ? 'Sign Up' : 'Log In'}</button>
+        <button class="btn btn-primary" type="submit">{isSignUp ? 'Sign Up' : 'Log In'}</button>
         <p onClick={() => setIsSignUp(!isSignUp)}>
             {isSignUp ? 'Already have an account? Log in' : 'Need an account? Sign up'}
         </p>

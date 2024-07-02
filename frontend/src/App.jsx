@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; 
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import LandingPage from './components/LandingPage'
 import SignIn from './components/SignIn'
 import UserProfile from './components/UserProfile';
 import FeaturedStories from './components/FeaturedStories'
 
-import './App.css'
 import TopicSelector from './components/TopicSelector';
 
 function App() {

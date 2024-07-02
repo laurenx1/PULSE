@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 const UserProfile = ({ user }) => {
     const { username, preferredTopics, liked, saved } = user;
 
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
 
     const handleSelectTopics = () => {
         navigate(`/${user.id}/topics`)
