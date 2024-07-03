@@ -13,6 +13,7 @@ function App() {
 
   return (
     <>
+    <div data-theme='mytheme'>
     <Router>
       <Routes>
           <Route path='/' element={
@@ -29,6 +30,7 @@ function App() {
 
       </Routes>
     </Router>
+    </div>
     </>
   )
 }

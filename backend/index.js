@@ -3,11 +3,13 @@ const bcrypt = require('bcrypt');
 const cors = require('cors');
 const { PrismaClient } = require('@prisma/client');
 const { createClient } = require('@supabase/supabase-js');
+const { OAuth2Client } = require('google-auth-library');
 
 
 const prisma = new PrismaClient();
 const app = express();
 const PORT = 3000;
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 app.use(express.json());
 app.use(cors()); 
@@ -57,6 +59,37 @@ app.post('/api/login', async (req, res) => {
     res.status(500).json({ success: false, error: 'Error logging in' });
   }
 });
+
+
+app.post('/api/google-login', async (req, res) => {
+    const { token } = req.body;
+  
+    try {
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      const { email, name, picture } = payload;
+  
+      let user = await prisma.user.findUnique({ where: { email } });
+  
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            email,
+            username: name,
+            picture,
+          },
+        });
+      }
+  
+      res.json({ success: true, user });
+    } catch (error) {
+      console.error('Error with Google login:', error);
+      res.status(500).json({ success: false, error: 'Error with Google login' });
+    }
+  });
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
