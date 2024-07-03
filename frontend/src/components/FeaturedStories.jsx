@@ -11,32 +11,31 @@ const FeaturedStories = ({ user }) => {
     useEffect(() => {
         const fetchTopStories = async () => {
             try {
-                const response = await axios.get(`https://newsdata.io/api/1/news`, {
+                const response = await axios.get(`https://newsdata.io/api/1/latest?`, {
                     params: {
-    
                         apikey: apiKey,
                         q: `breaking`,
                         country: 'us',
-                        language: 'en',
-                        limit: 10
                     }
                 });
                 setTopStories(response.data.results || []);
             } catch (error) {
+                console.log(apiKey);
                 console.error('Error fetching top stories:', error);
             }
         };
 
+
         const fetchRelatedStories = async () => {
             try {
                 const topicsQuery = user.preferredTopics.map(topic => topic).join(' ');
-                const response = await axios.get(`https://newsdata.io/api/1/news`, {
+                console.log(topicsQuery);
+                const response = await axios.get(`https://newsdata.io/api/1/latest?`, {
                     params: {
                         apikey: apiKey,
                         country: 'us',
                         language: 'en',
                         q: topicsQuery,
-                        limit: 5
                     }
                 });
                 setRelatedStories(response.data.results || []);
@@ -53,6 +52,7 @@ const FeaturedStories = ({ user }) => {
         }
     }, [apiKey, user.preferredTopics]);
 
+
     const handleArticleClick = (url) => {
         // Navigate to the article URL when clicked
         navigate(url);
@@ -67,7 +67,7 @@ const FeaturedStories = ({ user }) => {
                 <ul className="space-y-3">
                     {topStories.map((article, index) => (
                         <li key={index} className="text-blue-600 hover:text-blue-700">
-                            <a href={article.url} target="_blank" rel="noopener noreferrer" onClick={() => handleArticleClick(article.url)}>
+                            <a href={article.link} target="_blank" rel="noopener noreferrer" onClick={() => handleArticleClick(article.link)}>
                                 {article.title}
                             </a>
                         </li>

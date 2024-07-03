@@ -1,5 +1,6 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
+
 
 const UserProfile = ({ user }) => {
     const { username, preferredTopics, liked, saved } = user;
@@ -13,6 +14,7 @@ const UserProfile = ({ user }) => {
     const handleGoFeatured = () => {
         navigate(`/${user.id}/featured`);
     }
+
 
     return (
         <div className="container mx-auto px-4 py-8 bg-base-100">

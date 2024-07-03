@@ -106,7 +106,7 @@ const SignIn = ({ setUser }) => {
                         />
                     </div>
                 )}
-                <button className="btn btn-primary w-full" type="submit">{isSignUp ? 'Sign Up' : 'Log In'}</button>
+                <button className="btn btn-info w-full" type="submit">{isSignUp ? 'Sign Up' : 'Log In'}</button>
                 <p className="text-sm mt-4 text-center cursor-pointer" onClick={() => setIsSignUp(!isSignUp)}>
                     {isSignUp ? 'Already have an account? Log in' : 'Need an account? Sign up'}
                 </p>
