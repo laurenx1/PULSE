@@ -7,7 +7,7 @@ const SignIn = ({ setUser }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [username, setUsername] = useState('');
-    const [isSignUp, setIsSignUp] = useState(true); // Start with sign up mode
+    const [isSignUp, setIsSignUp] = useState(true);
 
     const navigate = useNavigate();
 
@@ -31,10 +31,9 @@ const SignIn = ({ setUser }) => {
                     }
                 });
                 const data = response.data;
-                console.log(data); // Handle response accordingly
+                console.log(data);
                 handleVerifiedAccount(data.user);
             } else {
-                // Handle login
                 const response = await axios.post(import.meta.env.VITE_BACKEND_URL + '/api/login', {
                     email,
                     password
@@ -44,7 +43,7 @@ const SignIn = ({ setUser }) => {
                     }
                 });
                 const data = response.data;
-                console.log(data); // Handle response accordingly
+                console.log(data);
                 handleVerifiedAccount(data.user);
             }
         } catch (error) {
@@ -59,7 +58,7 @@ const SignIn = ({ setUser }) => {
                 token: credential
             });
             const data = res.data;
-            console.log(data); // Handle response accordingly
+            console.log(data);
             handleVerifiedAccount(data.user);
         } catch (error) {
             console.error('Error with Google login', error);

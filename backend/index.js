@@ -98,22 +98,30 @@ app.listen(PORT, () => {
 
 app.patch('/api/users/:id', async (req, res) => {
     const { id } = req.params;
-    const { preferredTopics } = req.body;
+    const { preferredTopics, lastRead } = req.body;
   
     try {
-      const user = await prisma.user.update({
-        where: { id: parseInt(id) },
-        data: { preferredTopics },
-      });
-  
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
-  
-      res.status(200).send({ message: 'Preferred topics updated successfully!', user });
+        const data = {};
+        if (preferredTopics !== undefined) {
+            data.preferredTopics = preferredTopics;
+        }
+        if (lastRead !== undefined) {
+            data.lastRead = lastRead;
+        }
+
+        const user = await prisma.user.update({
+            where: { id: parseInt(id) },
+            data,
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.status(200).send({ message: 'User updated successfully!', user });
     } catch (error) {
-      console.error('Error updating preferred topics:', error);
-      res.status(500).send({ error: 'Failed to update preferred topics.' });
+        console.error('Error updating user:', error);
+        res.status(500).send({ error: 'Failed to update user.' });
     }
   });
 

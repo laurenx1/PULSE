@@ -19,14 +19,14 @@ const TopicSelector = ({ user }) => {
     const handleSubmit = async () => {
         try {
             await axios.patch( import.meta.env.VITE_BACKEND_URL + `/api/users/${user.id}`, { preferredTopics: selectedTopics });
-            alert('Preferred topics updated successfully!');
+            navigate(`/profile/${user.id}`);
+            // alert('Preferred topics updated successfully!');
         } catch (error) {
             console.error('Error updating preferred topics:', error);
+            navigate(`/profile/${user.id}`);
             alert('Failed to update preferred topics.');
         }
 
-        // go back to profile once done button clicked
-        navigate(`/profile/${user.id}`);
     };
 
     return (

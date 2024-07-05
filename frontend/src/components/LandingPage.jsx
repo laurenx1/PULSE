@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../style/LandingPage.css';
 
 const LandingPage = () => {
     const navigate = useNavigate();
@@ -22,6 +21,7 @@ const LandingPage = () => {
                 <button
                     className="btn btn-custom"
                     style={{
+                        
                     }}
                     onClick={handleShowSignIn}
                 >
