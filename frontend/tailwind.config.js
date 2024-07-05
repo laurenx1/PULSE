@@ -1,9 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 
-import typography from '@tailwindcss/typography';
-import daisyui from 'daisyui';
+const typography = require('@tailwindcss/typography');
+const daisyui = require('daisyui');
 
-export default {
+module.exports = {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -13,6 +13,23 @@ export default {
   },
   plugins: [
     typography,
-    daisyui
+    daisyui,
   ],
+  daisyui: {
+    themes: [
+      {
+        mytheme: {
+          "primary": "#EB73CB",
+          "secondary": "#E359FF",
+          "accent": "#52C5FF",
+          "neutral": "#FF5EC7",
+          "base-100": "#000000",
+          "info": "#2E008E",
+          "success": "#ACF39D",
+          "warning": "#FFCE52",
+          "error": "#FFA33A",
+        },
+      },
+    ],
+  },
 }

@@ -18,6 +18,7 @@ model User {
   liked          Int[]
   saved          Int[]
   preferredTopics String[]
+  lastRead       Json          @default("{}")
   interactions   Interaction[] // establishes the reverse relation
   email          String        @unique
   username       String        @unique
