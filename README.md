@@ -3,7 +3,7 @@
 
 ## How to Use
 ### Frontend
-```npm install react-router-dom axios```
+```npm install react-router-dom axios ```
 
 .env file should have VITE_BACKEND_URL which is the base URL for localhost (use localhost:3000) and API key for retrieving news data from [newsdata.io](newsdata.io) called NEWSDATA_API_KEY
 
