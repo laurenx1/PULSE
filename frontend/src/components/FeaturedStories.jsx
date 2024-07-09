@@ -11,16 +11,9 @@ const FeaturedStories = ({ user, setClickedArticle }) => {
     useEffect(() => {
         const fetchTopStories = async () => {
             try {
-                const response = await axios.get(`https://newsdata.io/api/1/latest?`, {
-                    params: {
-                        apikey: apiKey,
-                        q: `breaking`,
-                        country: 'us',
-                    }
-                });
-                setTopStories(response.data.results || []);
+                const response = await axios.get(import.meta.env.VITE_BACKEND_URL + '/api/articles');
+                setTopStories(response.data || []);
             } catch (error) {
-                console.log(apiKey);
                 console.error('Error fetching top stories:', error);
             }
         };

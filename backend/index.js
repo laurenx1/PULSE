@@ -4,6 +4,8 @@ const cors = require('cors');
 const { PrismaClient } = require('@prisma/client');
 const { createClient } = require('@supabase/supabase-js');
 const { OAuth2Client } = require('google-auth-library');
+const cron = require('node-cron');
+const axios = require('axios');
 
 
 const prisma = new PrismaClient();
@@ -125,3 +127,77 @@ app.patch('/api/users/:id', async (req, res) => {
     }
   });
 
+  // Function to fetch and store articles
+  const fetchAndStoreArticles = async () => {
+    const apiKey = process.env.NEWS_API_KEY;
+    try {
+        const response = await axios.get('https://newsdata.io/api/1/latest?', {
+            params: {
+                apikey: apiKey,
+                q: 'breaking',
+                country: 'us',
+            },
+        });
+        const articles = response.data.results || [];
+
+        for (const article of articles) {
+            await prisma.article.upsert({
+                where: { title: article.title },
+                update: {},
+                create: {
+                    title: article.title || 'No title available',
+                    description: article.description || 'No description available',
+                    author: article.creator || [], // Initialize with an empty array if null
+                    url: article.link,
+                    keywords: article.keywords || [], // Initialize with an empty array if null
+                    publishedAt: new Date(article.pubDate || Date.now()), // Provide current date if pubDate is missing
+                },
+            });
+        }
+        console.log('Articles fetched and stored successfully.');
+    } catch (error) {
+        console.error('Error fetching and storing articles:', error);
+    }
+};
+  
+  // Schedule the fetch and store task to run every 30 minutes
+  cron.schedule('*/30 * * * *', fetchAndStoreArticles);
+
+  fetchAndStoreArticles();
+
+
+  app.get('/api/articles', async (req, res) => {
+    try {
+      const articles = await prisma.article.findMany({
+        orderBy: { publishedAt: 'desc' },
+        take: 10,
+      });
+      res.json(articles);
+    } catch (error) {
+      console.error('Error fetching articles:', error);
+      res.status(500).json({ error: 'Error fetching articles' });
+    }
+  });
+
+
+  app.post('/api/detect-ai-content-hf', async (req, res) => {
+    const { text } = req.body;
+    const hfApiKey = process.env.HF_API_KEY;
+
+    try {
+        const response = await axios.post(
+            "https://api-inference.huggingface.co/models/openai-community/roberta-base-openai-detector",
+            { inputs: text },
+            {
+                headers: {
+                    'Authorization': `Bearer ${hfApiKey}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        console.log(res.json(response.data));
+    } catch (error) {
+        console.error('Error detecting AI content:', error);
+        res.status(500).json({ error: 'Error detecting AI content' });
+    }
+});

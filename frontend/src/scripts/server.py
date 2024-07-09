@@ -8,6 +8,7 @@ CORS(app)
 @app.route('/scrape', methods=['GET'])
 def scrape(): 
     url = request.args.get('url')
+    print(url)
     if not url: 
         return jsonify({"error": "URL parameter is required"}), 400
 

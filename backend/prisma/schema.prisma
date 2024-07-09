@@ -26,21 +26,25 @@ model User {
 }
 
 model Article {
-  id          Int           @id @default(autoincrement())
-  title       String
-  content     String
-  url         String
-  topics      String[]
+  id          Int          @id @default(autoincrement())
+  title       String       @unique
+  author      String[]     @default([]) // Initialize with an empty array
+  description String?      @default("No description available") // Make this field nullable
+  keywords    String[]     @default([]) // Initialize with an empty array
   publishedAt DateTime
-  interactions Interaction[] // establishes the reverse relation
+  url         String      @unique
+  likes       Int         @default(0)
+  saves       Int         @default(0)
+  interactions Interaction[]
 }
 
 model Interaction {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
   userId    Int
+  article   Article  @relation(fields: [articleId], references: [id])
   articleId Int
-  clicked   Boolean
-  timeSpent Int
-  user      User   @relation(fields: [userId], references: [id])
-  article   Article @relation(fields: [articleId], references: [id])
-  @@id([userId, articleId])
+  liked     Boolean  @default(false)
+  saved     Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

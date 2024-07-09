@@ -10,7 +10,7 @@
 ```npm run dev``` to start frontend server
 
 ### Backend
-```npm install @prisma/client express cors bcrypt @supabase/supabasejs ```
+```npm install @prisma/client express cors bcrypt @supabase/supabasejs axios google-auth-library```
 
 .env file should have SUPABASE_URL which is postgres uri for database, SUPABASE_KEY which is client key for database, and SUPA_URL which is the https URL to database.
 
