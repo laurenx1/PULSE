@@ -6,12 +6,15 @@ const { createClient } = require('@supabase/supabase-js');
 const { OAuth2Client } = require('google-auth-library');
 const cron = require('node-cron');
 const axios = require('axios');
+const Replicate = require("replicate");
+
 
 
 const prisma = new PrismaClient();
 const app = express();
 const PORT = 3000;
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const replicate = new Replicate(); 
 
 app.use(express.json());
 app.use(cors()); 
@@ -197,7 +200,92 @@ app.patch('/api/users/:id', async (req, res) => {
         );
         console.log(res.json(response.data));
     } catch (error) {
-        console.error('Error detecting AI content:', error);
+        console.error('Error detecting AI content: ', error);
         res.status(500).json({ error: 'Error detecting AI content' });
     }
 });
+
+
+// Like an article
+app.post('/api/articles/:articleId/like', async (req, res) => {
+    const { articleId } = req.params;
+    const { userId } = req.body;
+  
+    try {
+      // Update the likes count in the Article model
+      await prisma.article.update({
+        where: { id: parseInt(articleId) },
+        data: {
+          likes: {
+            increment: 1,
+          },
+        },
+      });
+  
+      // Update the liked articles in the User model
+      await prisma.user.update({
+        where: { id: parseInt(userId) },
+        data: {
+          liked: {
+            push: parseInt(articleId),
+          },
+        },
+      });
+  
+      // Create an interaction
+      await prisma.interaction.create({
+        data: {
+          userId: parseInt(userId),
+          articleId: parseInt(articleId),
+          liked: true,
+        },
+      });
+  
+      res.status(200).json({ message: 'Article liked successfully!' });
+    } catch (error) {
+      console.error('Error liking article:', error);
+      res.status(500).json({ error: 'Error liking article' });
+    }
+  });
+  
+  // Save an article
+  app.post('/api/articles/:articleId/save', async (req, res) => {
+    const { articleId } = req.params;
+    const { userId } = req.body;
+  
+    try {
+      // Update the saves count in the Article model
+      await prisma.article.update({
+        where: { id: parseInt(articleId) },
+        data: {
+          saves: {
+            increment: 1,
+          },
+        },
+      });
+  
+      // Update the saved articles in the User model
+      await prisma.user.update({
+        where: { id: parseInt(userId) },
+        data: {
+          saved: {
+            push: parseInt(articleId),
+          },
+        },
+      });
+  
+      // Create an interaction
+      await prisma.interaction.create({
+        data: {
+          userId: parseInt(userId),
+          articleId: parseInt(articleId),
+          saved: true,
+        },
+      });
+  
+      res.status(200).json({ message: 'Article saved successfully!' });
+    } catch (error) {
+      console.error('Error saving article:', error);
+      res.status(500).json({ error: 'Error saving article' });
+    }
+  });

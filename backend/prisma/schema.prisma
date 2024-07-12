@@ -35,6 +35,8 @@ model Article {
   url         String      @unique
   likes       Int         @default(0)
   saves       Int         @default(0)
+  realScore   
+  
   interactions Interaction[]
 }
 
