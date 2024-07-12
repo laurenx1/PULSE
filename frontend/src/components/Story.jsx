@@ -12,7 +12,7 @@ const Story = ({ user, clickedArticle }) => {
 
     const handleLike = async () => {
         try {
-            await axios.post(`/api/articles/${clickedArticle.id}/like`, { userId: user.id });
+            await axios.post(import.meta.env.VITE_BACKEND_URL + `/api/articles/${clickedArticle.id}/like`, { userId: user.id });
             console.log('you liked:' + clickedArticle.title);
         } catch (error) {
             console.error('Error liking article:', error);
@@ -21,7 +21,7 @@ const Story = ({ user, clickedArticle }) => {
 
     const handleSave = async () => {
         try {
-            await axios.post(`/api/articles/${clickedArticle.id}/save`, { userId: user.id });
+            await axios.post(import.meta.env.VITE_BACKEND_URL + `/api/articles/${clickedArticle.id}/save`, { userId: user.id });
             console.log('you saved:' + clickedArticle.title);
         } catch (error) {
             console.error('Error saving article:', error);
