@@ -148,7 +148,7 @@ app.patch('/api/users/:id', async (req, res) => {
                 where: { title: article.title },
                 update: {},
                 create: {
-                    title: article.title || 'No title available',
+                    title: article.title,
                     description: article.description || 'No description available',
                     author: article.creator || [], // Initialize with an empty array if null
                     url: article.link,

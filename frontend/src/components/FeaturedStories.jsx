@@ -18,25 +18,27 @@ const FeaturedStories = ({ user, setClickedArticle }) => {
             }
         };
 
-        // Custom combination function
-const getCombinations = (array, size) => {
-    function* combinations(arr, size) {
-        if (size === 1) {
-            for (let i = 0; i < arr.length; i++) {
-                yield [arr[i]];
-            }
-        } else {
-            for (let i = 0; i <= arr.length - size; i++) {
-                const head = arr.slice(i, i + 1);
-                const tail = arr.slice(i + 1);
-                for (const comb of combinations(tail, size - 1)) {
-                    yield head.concat(comb);
+    // combination function: finds articles with keywords to maximize user's preferredTopics
+    const getCombinations = (array, size) => {
+        function* combinations(arr, size) {
+            // base case: if size is 1, yield each element as a single-element array
+            if (size === 1) {
+                for (let i = 0; i < arr.length; i++) {
+                    yield [arr[i]];
+                }
+            } else {
+                for (let i = 0; i <= arr.length - size; i++) {
+                    const head = arr.slice(i, i + 1);
+                    const tail = arr.slice(i + 1);
+                    // recursively get combinations of the remaining elements with size - 1
+                    for (const comb of combinations(tail, size - 1)) {
+                        yield head.concat(comb);
+                    }
                 }
             }
         }
-    }
-    return Array.from(combinations(array, size));
-};
+        return Array.from(combinations(array, size));
+    };
 
 // Delay function
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
