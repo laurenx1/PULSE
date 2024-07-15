@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Article" ALTER COLUMN "keywords" SET DEFAULT ARRAY[]::TEXT[],
+ALTER COLUMN "author" SET DEFAULT ARRAY[]::TEXT[];

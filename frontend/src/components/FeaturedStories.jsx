@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const FeaturedStories = ({ user }) => {
+const FeaturedStories = ({ user, setClickedArticle }) => {
     const apiKey = import.meta.env.VITE_NEWSDATA_API_KEY;
     const [topStories, setTopStories] = useState([]);
     const [relatedStories, setRelatedStories] = useState([]);
@@ -11,40 +11,102 @@ const FeaturedStories = ({ user }) => {
     useEffect(() => {
         const fetchTopStories = async () => {
             try {
-                const response = await axios.get(`https://newsdata.io/api/1/latest?`, {
-                    params: {
-                        apikey: apiKey,
-                        q: `breaking`,
-                        country: 'us',
-                    }
-                });
-                setTopStories(response.data.results || []);
+                const response = await axios.get(import.meta.env.VITE_BACKEND_URL + '/api/articles');
+                setTopStories(response.data || []);
             } catch (error) {
-                console.log(apiKey);
                 console.error('Error fetching top stories:', error);
             }
         };
 
-
-        const fetchRelatedStories = async () => {
-            try {
-                const topicsQuery = user.preferredTopics.map(topic => topic).join(' ');
-                console.log('hello');
-                console.log(topicsQuery);
-                const response = await axios.get(`https://newsdata.io/api/1/latest?`, {
-                    params: {
-                        apikey: apiKey,
-                        q: topicsQuery,
-                        country: 'us',
-                        language: 'en',
-
+    // combination function: finds articles with keywords to maximize user's preferredTopics
+    const getCombinations = (array, size) => {
+        function* combinations(arr, size) {
+            // base case: if size is 1, yield each element as a single-element array
+            if (size === 1) {
+                for (let i = 0; i < arr.length; i++) {
+                    yield [arr[i]];
+                }
+            } else {
+                for (let i = 0; i <= arr.length - size; i++) {
+                    const head = arr.slice(i, i + 1);
+                    const tail = arr.slice(i + 1);
+                    // recursively get combinations of the remaining elements with size - 1
+                    for (const comb of combinations(tail, size - 1)) {
+                        yield head.concat(comb);
                     }
-                });
-                setRelatedStories(response.data.results || []);
-            } catch (error) {
-                console.error('Error fetching related stories:', error);
+                }
             }
-        };
+        }
+        return Array.from(combinations(array, size));
+    };
+
+// Delay function
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Simple in-memory cache
+const cache = {};
+
+// Function to fetch related stories
+const fetchRelatedStories = async () => {
+    try {
+        const maxArticles = 10; // Number of articles to fetch
+        let relatedStories = [];
+        const topics = user.preferredTopics;
+        const maxCombinations = 3; // Max topics in a combination
+        const articleUrls = new Set(); // Track unique article URLs
+
+        for (let i = Math.min(maxCombinations, topics.length); i > 0; i--) {
+            const topicCombinations = getCombinations(topics, i);
+
+            for (const combo of topicCombinations) {
+                const topicsQuery = combo.join(' ');
+
+                // Check cache first
+                if (cache[topicsQuery]) {
+                    cache[topicsQuery].forEach(article => {
+                        if (!articleUrls.has(article.link)) {
+                            articleUrls.add(article.link);
+                            relatedStories.push(article);
+                        }
+                    });
+                } else {
+                    // Make API request if not in cache
+                    const response = await axios.get('https://newsdata.io/api/1/latest?', {
+                        params: {
+                            apikey: apiKey,
+                            q: topicsQuery,
+                            country: 'us',
+                            language: 'en',
+                        }
+                    });
+
+                    const results = response.data.results || [];
+                    cache[topicsQuery] = results; // Cache the results
+
+                    results.forEach(article => {
+                        if (!articleUrls.has(article.link)) {
+                            articleUrls.add(article.link);
+                            relatedStories.push(article);
+                        }
+                    });
+
+                    // Delay to avoid hitting the rate limit
+                    await delay(1000); // 1-second delay between requests
+                }
+
+                if (relatedStories.length >= maxArticles) {
+                    setRelatedStories(relatedStories.slice(0, maxArticles));
+                    return;
+                }
+            }
+        }
+
+        // If fewer than 10 articles are found, set whatever was found
+        setRelatedStories(relatedStories);
+    } catch (error) {
+        console.error('Error fetching related stories:', error);
+    }
+};
 
         if (apiKey) {
             fetchTopStories();
@@ -60,10 +122,11 @@ const FeaturedStories = ({ user }) => {
         // navigate(article.link);
         try {
             await axios.patch( import.meta.env.VITE_BACKEND_URL + `/api/users/${user.id}`, { lastRead: article });
-            // alert('Preferred topics updated successfully!');
         } catch (error) {
             console.error('Error updating last read article:', error);
         }
+        setClickedArticle(article);
+        navigate(`/openArticle`); // open the article
     };
 
     return (

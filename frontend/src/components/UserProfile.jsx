@@ -21,6 +21,10 @@ const UserProfile = ({ user }) => {
         navigate(`/${user.id}/featured`);
     };
 
+    const handleGoPulseCheck = () => {
+        navigate(`/${user.id}/pulsecheck`);
+    }
+
     const handleLastRead = () => {
         console.log('going to last read article!');
     }
@@ -33,7 +37,7 @@ const UserProfile = ({ user }) => {
                     <button className="btn text-primary">♥</button>
                     <button className="btn text-secondary">★</button>
                     <button className="btn text-white" onClick={handleGoFeatured}>Featured Stories</button>
-                    <button className="btn text-white">PULSECHECK</button>
+                    <button className="btn text-white" onClick={handleGoPulseCheck}>PULSECHECK</button>
                     <button className="btn text-white">About Us</button>
                 </nav>
             </header>

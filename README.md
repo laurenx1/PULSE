@@ -3,14 +3,14 @@
 
 ## How to Use
 ### Frontend
-```npm install react-router-dom axios```
+```npm install react-router-dom axios ```
 
 .env file should have VITE_BACKEND_URL which is the base URL for localhost (use localhost:3000) and API key for retrieving news data from [newsdata.io](newsdata.io) called NEWSDATA_API_KEY
 
 ```npm run dev``` to start frontend server
 
 ### Backend
-```npm install @prisma/client express cors bcrypt @supabase/supabasejs ```
+```npm install @prisma/client express cors bcrypt @supabase/supabasejs axios google-auth-library```
 
 .env file should have SUPABASE_URL which is postgres uri for database, SUPABASE_KEY which is client key for database, and SUPA_URL which is the https URL to database.
 
