@@ -131,78 +131,79 @@ app.patch('/api/users/:id', async (req, res) => {
   });
 
   // Function to fetch and store articles
-  const fetchAndStoreArticles = async () => {
-    const apiKey = process.env.NEWS_API_KEY;
-    try {
-        const response = await axios.get('https://newsdata.io/api/1/latest?', {
-            params: {
-                apikey: apiKey,
-                q: 'breaking',
-                country: 'us',
-            },
-        });
-        const articles = response.data.results || [];
+const fetchAndStoreArticles = async () => {
+  const apiKey = process.env.NEWS_API_KEY;
+  try {
+      const response = await axios.get('https://newsdata.io/api/1/latest?', {
+          params: {
+              apikey: apiKey,
+              q: 'breaking',
+              country: 'us',
+          },
+      });
+      const articles = response.data.results || [];
 
-        for (const article of articles) {
-            await prisma.article.upsert({
-                where: { title: article.title },
-                update: {},
-                create: {
-                    title: article.title,
-                    description: article.description || 'No description available',
-                    author: article.creator || [], // Initialize with an empty array if null
-                    url: article.link,
-                    keywords: article.keywords || [], // Initialize with an empty array if null
-                    publishedAt: new Date(article.pubDate || Date.now()), // Provide current date if pubDate is missing
-                },
-            });
-        }
-        console.log('Articles fetched and stored successfully.');
-    } catch (error) {
-        console.error('Error fetching and storing articles:', error);
-    }
+      for (const article of articles) {
+          await prisma.article.upsert({
+              where: { title: article.title },
+              update: {},
+              create: {
+                  title: article.title,
+                  description: article.description || 'No description available',
+                  author: article.creator || [], // Initialize with an empty array if null
+                  url: article.link,
+                  keywords: article.keywords || [], // Initialize with an empty array if null
+                  publishedAt: new Date(article.pubDate || Date.now()), // Provide current date if pubDate is missing
+              },
+          });
+      }
+      console.log('Articles fetched and stored successfully.');
+  } catch (error) {
+      console.error('Error fetching and storing articles:', error);
+  }
 };
   
   // Schedule the fetch and store task to run every 30 minutes
-  cron.schedule('*/30 * * * *', fetchAndStoreArticles);
+  // cron.schedule('*/30 * * * *', fetchAndStoreArticles);
 
-  fetchAndStoreArticles();
-
-
-  app.get('/api/articles', async (req, res) => {
-    try {
-      const articles = await prisma.article.findMany({
-        orderBy: { publishedAt: 'desc' },
-        take: 10,
-      });
-      res.json(articles);
-    } catch (error) {
-      console.error('Error fetching articles:', error);
-      res.status(500).json({ error: 'Error fetching articles' });
-    }
-  });
+  // fetchAndStoreArticles();
 
 
-  app.post('/api/detect-ai-content-hf', async (req, res) => {
-    const { text } = req.body;
-    const hfApiKey = process.env.HF_API_KEY;
+app.get('/api/articles', async (req, res) => {
+  try {
+    const articles = await prisma.article.findMany({
+      orderBy: { publishedAt: 'desc' },
+      take: 10,
+    });
+    res.json(articles);
+  } catch (error) {
+    console.error('Error fetching articles:', error);
+    res.status(500).json({ error: 'Error fetching articles' });
+  }
+});
 
-    try {
-        const response = await axios.post(
-            "https://api-inference.huggingface.co/models/openai-community/roberta-base-openai-detector",
-            { inputs: text },
-            {
-                headers: {
-                    'Authorization': `Bearer ${hfApiKey}`,
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
-        console.log(res.json(response.data));
-    } catch (error) {
-        console.error('Error detecting AI content: ', error);
-        res.status(500).json({ error: 'Error detecting AI content' });
-    }
+
+
+app.post('/api/detect-ai-content-hf', async (req, res) => {
+  const { text } = req.body;
+  const hfApiKey = process.env.HF_API_KEY;
+
+  try {
+      const response = await axios.post(
+          "https://api-inference.huggingface.co/models/openai-community/roberta-base-openai-detector",
+          { inputs: text },
+          {
+              headers: {
+                  'Authorization': `Bearer ${hfApiKey}`,
+                  'Content-Type': 'application/json',
+              },
+          }
+      );
+      console.log(res.json(response.data));
+  } catch (error) {
+      console.error('Error detecting AI content: ', error);
+      res.status(500).json({ error: 'Error detecting AI content' });
+  }
 });
 
 
@@ -248,44 +249,144 @@ app.post('/api/articles/:articleId/like', async (req, res) => {
     }
   });
   
-  // Save an article
-  app.post('/api/articles/:articleId/save', async (req, res) => {
-    const { articleId } = req.params;
-    const { userId } = req.body;
-  
-    try {
-      // Update the saves count in the Article model
-      await prisma.article.update({
-        where: { id: parseInt(articleId) },
-        data: {
-          saves: {
-            increment: 1,
-          },
+// Save an article
+app.post('/api/articles/:articleId/save', async (req, res) => {
+  const { articleId } = req.params;
+  const { userId } = req.body;
+
+  try {
+    // Update the saves count in the Article model
+    await prisma.article.update({
+      where: { id: parseInt(articleId) },
+      data: {
+        saves: {
+          increment: 1,
         },
-      });
-  
-      // Update the saved articles in the User model
-      await prisma.user.update({
-        where: { id: parseInt(userId) },
-        data: {
-          saved: {
-            push: parseInt(articleId),
-          },
+      },
+    });
+
+    // Update the saved articles in the User model
+    await prisma.user.update({
+      where: { id: parseInt(userId) },
+      data: {
+        saved: {
+          push: parseInt(articleId),
         },
-      });
-  
-      // Create an interaction
-      await prisma.interaction.create({
-        data: {
-          userId: parseInt(userId),
-          articleId: parseInt(articleId),
-          saved: true,
-        },
-      });
-  
-      res.status(200).json({ message: 'Article saved successfully!' });
-    } catch (error) {
-      console.error('Error saving article:', error);
-      res.status(500).json({ error: 'Error saving article' });
+      },
+    });
+
+    // Create an interaction
+    await prisma.interaction.create({
+      data: {
+        userId: parseInt(userId),
+        articleId: parseInt(articleId),
+        saved: true,
+      },
+    });
+
+    res.status(200).json({ message: 'Article saved successfully!' });
+  } catch (error) {
+    console.error('Error saving article:', error);
+    res.status(500).json({ error: 'Error saving article' });
+  }
+});
+
+
+
+
+// stuff for recommended algorithm: 
+
+// fetch preferred topics across all users
+const getAllPreferredTopics = async () => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        preferredTopics: true,
+      },
+    });
+
+    return users.flatMap(user => user.preferredTopics); 
+  } catch (error) {
+    console.error('Error fetching preferred topics:', error);
+  }
+};
+
+
+// generate a frequency dictionary of the topics that users are interested in. 
+const generateFrequencyDictionary = (topics) => {
+  const frequencyDict = {};
+
+  topics.forEach(topic => {
+    if (!frequencyDict[topic]) {
+      frequencyDict[topic] = 0;
     }
+    frequencyDict[topic] += 1;
   });
+
+  return frequencyDict;
+};
+
+
+// fetch and cache articles based on the topics in this frequency dictionary
+const fetchAndCacheArticlesByTopics = async (topics, limit = 10) => {
+const apiKey = process.env.NEWS_API_KEY;
+const articles = [];
+
+for (const topic of topics) {
+  console.log(topic);
+  try {
+    const response = await axios.get('https://newsdata.io/api/1/news', {
+      params: {
+        apikey: apiKey,
+        q: topic,
+        country: 'us',
+      },
+    });
+
+    const topicArticles = response.data.results || [];
+    articles.push(...topicArticles.slice(0, limit)); // Limit articles per topic
+
+    for (const article of topicArticles) {
+      await prisma.article.upsert({
+        where: { url: article.link },
+        update: {},
+        create: {
+          title: article.title,
+          description: article.description || "no description available",
+          author: article.creator || [],
+          url: article.link,
+          keywords: article.keywords || [],
+          publishedAt: new Date(article.pubDate || Date.now()),
+        },
+      });
+    }
+  } catch (error) {
+    console.error(`Error fetching articles for topic ${topic}:`, error);
+  }
+}
+
+console.log('Articles fetched and cached successfully.');
+};
+
+const scheduleArticleFetching = () => {
+cron.schedule('*/30 * * * *', async () => {
+  await fetchAndStoreArticles();
+
+  const preferredTopics = await getAllPreferredTopics();
+  const frequencyDict = generateFrequencyDictionary(preferredTopics);
+  const sortedTopics = Object.keys(frequencyDict).sort((a, b) => frequencyDict[b] - frequencyDict[a]);
+  const topNTopics = sortedTopics.slice(0, 5);
+  await fetchAndCacheArticlesByTopics(topNTopics);
+});
+
+fetchAndStoreArticles();
+(async () => {
+  const preferredTopics = await getAllPreferredTopics();
+  const frequencyDict = generateFrequencyDictionary(preferredTopics);
+  const sortedTopics = Object.keys(frequencyDict).sort((a, b) => frequencyDict[b] - frequencyDict[a]);
+  const topNTopics = sortedTopics.slice(0, 5);
+  await fetchAndCacheArticlesByTopics(topNTopics);
+})();
+};
+
+scheduleArticleFetching();
