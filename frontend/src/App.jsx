@@ -13,6 +13,8 @@ function App() {
   const [user, setUser] = useState(null);
   const [clickedArticle, setClickedArticle] = useState(''); 
 
+
+
   return (
     <>
     <div data-theme='mytheme'>
@@ -28,7 +30,7 @@ function App() {
           } />
          {user !== null && <Route path={`/profile/${user.id}`} element={<UserProfile user={user} />} />}
          {user !== null && <Route path={`/${user.id}/featured`} element={<FeaturedStories user={user} setClickedArticle={setClickedArticle}/>} />}
-         {user !== null && <Route path={`/${user.id}/topics`} element={<TopicSelector user={user} />} />}
+         {user !== null && <Route path={`/${user.id}/topics`} element={<TopicSelector user={user} setUser={setUser} />} />}
          {clickedArticle !== '' && <Route path={`/openArticle`} element={<Story user={user} clickedArticle={clickedArticle}/>}/>}
          {user !== null && <Route path={`/${user.id}/pulsecheck`} element={<PulseCheck user={user} />} />}
       </Routes>

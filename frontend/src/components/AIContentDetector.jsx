@@ -28,7 +28,7 @@ const AIContentDetector = ({ content, setReal, setFake }) => {
             const REAL = JSON.parse(JSON.stringify(result[0][0]))["score"];
             const FAKE = JSON.parse(JSON.stringify(result[0][1]))["score"];
             console.log(REAL * 100);
-            // console.log(FAKE * 100);
+            console.log(FAKE * 100);
          
             setReal((REAL * 100).toFixed(4));
             

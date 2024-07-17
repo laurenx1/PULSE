@@ -9,6 +9,7 @@ const FeaturedStories = ({ user, setClickedArticle }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        // Function to fetch top stories
         const fetchTopStories = async () => {
             try {
                 const response = await axios.get(import.meta.env.VITE_BACKEND_URL + '/api/articles');
@@ -18,95 +19,17 @@ const FeaturedStories = ({ user, setClickedArticle }) => {
             }
         };
 
-    // combination function: finds articles with keywords to maximize user's preferredTopics
-    const getCombinations = (array, size) => {
-        function* combinations(arr, size) {
-            // base case: if size is 1, yield each element as a single-element array
-            if (size === 1) {
-                for (let i = 0; i < arr.length; i++) {
-                    yield [arr[i]];
-                }
-            } else {
-                for (let i = 0; i <= arr.length - size; i++) {
-                    const head = arr.slice(i, i + 1);
-                    const tail = arr.slice(i + 1);
-                    // recursively get combinations of the remaining elements with size - 1
-                    for (const comb of combinations(tail, size - 1)) {
-                        yield head.concat(comb);
-                    }
-                }
+
+        // Function to fetch related stories
+        const fetchRelatedStories = async () => {
+            try {
+                const response = await axios.get(import.meta.env.VITE_BACKEND_URL + `/api/recommendations/${user.id}`);
+                setRelatedStories(response.data || []);
+            } catch (error) {
+                console.error('Error fetching recommended stories:', error);
             }
-        }
-        return Array.from(combinations(array, size));
-    };
+        };
 
-// Delay function
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Simple in-memory cache
-const cache = {};
-
-// Function to fetch related stories
-const fetchRelatedStories = async () => {
-    try {
-        const maxArticles = 10; // Number of articles to fetch
-        let relatedStories = [];
-        const topics = user.preferredTopics;
-        const maxCombinations = 3; // Max topics in a combination
-        const articleUrls = new Set(); // Track unique article URLs
-
-        for (let i = Math.min(maxCombinations, topics.length); i > 0; i--) {
-            const topicCombinations = getCombinations(topics, i);
-
-            for (const combo of topicCombinations) {
-                const topicsQuery = combo.join(' ');
-
-                // Check cache first
-                if (cache[topicsQuery]) {
-                    cache[topicsQuery].forEach(article => {
-                        if (!articleUrls.has(article.link)) {
-                            articleUrls.add(article.link);
-                            relatedStories.push(article);
-                        }
-                    });
-                } else {
-                    // Make API request if not in cache
-                    const response = await axios.get('https://newsdata.io/api/1/latest?', {
-                        params: {
-                            apikey: apiKey,
-                            q: topicsQuery,
-                            country: 'us',
-                            language: 'en',
-                        }
-                    });
-
-                    const results = response.data.results || [];
-                    cache[topicsQuery] = results; // Cache the results
-
-                    results.forEach(article => {
-                        if (!articleUrls.has(article.link)) {
-                            articleUrls.add(article.link);
-                            relatedStories.push(article);
-                        }
-                    });
-
-                    // Delay to avoid hitting the rate limit
-                    await delay(1000); // 1-second delay between requests
-                }
-
-                if (relatedStories.length >= maxArticles) {
-                    setRelatedStories(relatedStories.slice(0, maxArticles));
-                    return;
-                }
-            }
-        }
-
-        // If fewer than 10 articles are found, set whatever was found
-        setRelatedStories(relatedStories);
-    } catch (error) {
-        console.error('Error fetching related stories:', error);
-    }
-};
 
         if (apiKey) {
             fetchTopStories();
@@ -151,7 +74,7 @@ const fetchRelatedStories = async () => {
                 <ul className="space-y-3">
                     {relatedStories.map((article, index) => (
                         <li key={index} className="text-blue-600 hover:text-blue-700">
-                            <a href={article.url} target="_blank" rel="noopener noreferrer" onClick={() => handleArticleClick(article)}>
+                            <a href={article.link} target="_blank" rel="noopener noreferrer" onClick={() => handleArticleClick(article)}>
                                 {article.title}
                             </a>
                         </li>

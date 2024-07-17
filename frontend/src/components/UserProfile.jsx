@@ -10,7 +10,7 @@ const UserProfile = ({ user }) => {
 
     useEffect(() => {
         setTopics(preferredTopics);
-    }, [preferredTopics]);
+    }, [preferredTopics, user]); // Update useEffect to depend on preferredTopics
 
     const handleSelectTopics = () => {
         navigate(`/${user.id}/topics`);
@@ -52,7 +52,6 @@ const UserProfile = ({ user }) => {
                     <p className="text-green-400 mb-2">• No AI generated content</p>
                     <p className="text-white-400">{lastRead.creator}</p>
                     <p className="text-gray-400">{lastRead.description}</p>
-            
                 </div>
                 <div className="bg-gradient-to-r from-[#2E008E] via-[#7042D2] to-[#FCC188] rounded-lg p-4 mb-8">
                     <h3 className="text-lg font-bold mb-4">YOUR PULSE POINTS</h3>
