@@ -7,6 +7,7 @@ const { OAuth2Client } = require('google-auth-library');
 const cron = require('node-cron');
 const axios = require('axios');
 const Replicate = require("replicate");
+const Groq = require("groq-sdk");
 
 
 
@@ -15,9 +16,12 @@ const app = express();
 const PORT = 3000;
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const replicate = new Replicate(); 
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
 
 app.use(express.json());
 app.use(cors()); 
+
 
 // Register a new user
 app.post('/api/register', async (req, res) => {
@@ -40,6 +44,7 @@ app.post('/api/register', async (req, res) => {
     res.status(500).json({ success: false, error: 'Error registering user' });
   }
 });
+
 
 // Login an existing user
 app.post('/api/login', async (req, res) => {
@@ -65,7 +70,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-
+// Login user woth google
 app.post('/api/google-login', async (req, res) => {
     const { token } = req.body;
   
@@ -96,9 +101,11 @@ app.post('/api/google-login', async (req, res) => {
     }
   });
 
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
 
 // update preferredTopics, lastRead
 app.patch('/api/users/:id', async (req, res) => {
@@ -130,6 +137,7 @@ app.patch('/api/users/:id', async (req, res) => {
       res.status(500).send({ error: 'Failed to update user.' });
   }
 });
+
 
   // Function to fetch and store articles
 const fetchAndStoreArticles = async () => {
@@ -163,11 +171,6 @@ const fetchAndStoreArticles = async () => {
       console.error('Error fetching and storing articles:', error);
   }
 };
-  
-  // Schedule the fetch and store task to run every 30 minutes
-  // cron.schedule('*/30 * * * *', fetchAndStoreArticles);
-
-  // fetchAndStoreArticles();
 
 
 app.get('/api/articles', async (req, res) => {
@@ -188,13 +191,28 @@ app.get('/api/articles', async (req, res) => {
 
 
 app.post('/api/detect-ai-content-hf', async (req, res) => {
-  const { text } = req.body;
+  const { content, articleId } = req.body;
   const hfApiKey = process.env.HF_API_KEY;
+  console.log(content);
+  if (!content || !articleId) {
+      return res.status(400).json({ error: 'Text and articleId are required.' });
+  }
 
   try {
+      // Fetch article from the database
+      const article = await prisma.article.findUnique({
+          where: { id: articleId },
+      });
+
+      // Check if the scores are already calculated
+      if (article && article.realScore !== 0.0 && article.fakeScore !== 0.0) {
+          return res.json({ realScore: article.realScore, fakeScore: article.fakeScore });
+      }
+
+      // If scores are not present, calculate them using Hugging Face API
       const response = await axios.post(
           "https://api-inference.huggingface.co/models/openai-community/roberta-base-openai-detector",
-          { inputs: text },
+          { inputs: content },
           {
               headers: {
                   'Authorization': `Bearer ${hfApiKey}`,
@@ -202,12 +220,26 @@ app.post('/api/detect-ai-content-hf', async (req, res) => {
               },
           }
       );
-      console.log(res.json(response.data));
+
+      const realScore = response.data[0][0].score;
+      const fakeScore = response.data[0][1].score;
+
+      // Update the article with the new scores
+      await prisma.article.update({
+          where: { id: articleId },
+          data: {
+              realScore,
+              fakeScore,
+          },
+      });
+
+      res.json({ realScore, fakeScore });
   } catch (error) {
-      console.error('Error detecting AI content: ', error);
+      console.error('Error detecting AI content:', error);
       res.status(500).json({ error: 'Error detecting AI content' });
   }
 });
+
 
 
 // Like an article
@@ -252,6 +284,7 @@ app.post('/api/articles/:articleId/like', async (req, res) => {
     }
   });
   
+
 // Save an article
 app.post('/api/articles/:articleId/save', async (req, res) => {
   const { articleId } = req.params;
@@ -293,6 +326,36 @@ app.post('/api/articles/:articleId/save', async (req, res) => {
     res.status(500).json({ error: 'Error saving article' });
   }
 });
+
+
+// view liked or saved articles 
+app.get('/api/interactedArticles', async (req, res) => {
+  const { type, userId } = req.query; // type can be 'liked' or 'saved'
+
+  try {
+      const user = await prisma.user.findUnique({
+          where: { id: parseInt(userId) },
+          include: { interactions: true },
+      });
+
+      if (!user) {
+          return res.status(404).json({ error: 'User not found' });
+      }
+
+      const articleIds = user[type] || [];
+      const articles = await prisma.article.findMany({
+          where: { id: { in: articleIds } },
+          orderBy: { publishedAt: 'desc' },
+      });
+
+      res.json(articles);
+  } catch (error) {
+      console.error(`Error fetching ${type} articles:`, error);
+      res.status(500).json({ error: `Error fetching ${type} articles` });
+  }
+});
+
+
 
 
 
@@ -372,6 +435,7 @@ for (const topic of topics) {
 console.log('Articles fetched and cached successfully.');
 };
 
+
 const scheduleArticleFetching = () => {
 cron.schedule('*/30 * * * *', async () => {
   await fetchAndStoreArticles();
@@ -416,6 +480,7 @@ const calculateUserSimilarity = (user1, user2) => {
   return similarityScore;
 };
 
+
 // find similar users
 const findSimilarUsers = (targetUser, allUsers, similarityThreshold) => {
   return allUsers.filter(user => {
@@ -454,6 +519,7 @@ const recommendArticles = (targetUser, similarUsers, allArticles) => {
   return sortedArticleIds.map(articleId => allArticles.find(article => article.id === parseInt(articleId)));
 };
 
+
 // create API endpoint to get recommended articles. 
 // @TODO: build bigger user base for dev purposes. 
 app.get('/api/recommendations/:userId', async (req, res) => {
@@ -483,6 +549,93 @@ app.get('/api/recommendations/:userId', async (req, res) => {
   }
 
 });
+
+
+
+
+
+
+
+
+
+// PULSECHECK stuff
+// async function getGroqChatCompletion(userInput) {
+//   return groq.chat.completions.create({
+//     messages: [
+//       {
+//         role: "user",
+//         content: "Explain the importance of fast language models",
+//       },
+//     ],
+//     model: "llama3-8b-8192",
+//   });
+// }
+
+
+// async function getLlamaResponse() {
+//   const chatCompletion = await getGroqChatCompletion();
+//   // Print the completion returned by the LLM.
+//   console.log(chatCompletion.choices[0]?.message?.content || "");
+// }
+
+
+
+
+// const endpoint = 'https://api.groq.com/openai/v1/completions';
+// const headers = {
+//   'Authorization': `Bearer ${groqApiKey}`,
+//   'Content-Type': 'application/json'
+// };
+
+
+// const requestBody = {
+//   'prompt': 'Your input prompt here', // replace with your input prompt
+//   'max_tokens': 200,
+//   'model': modelId
+// };
+
+
+// axios.post(endpoint, requestBody, { headers: headers })
+//   .then(response => {
+//     console.log(response.data);
+//   })
+//   .catch(error => {
+//     console.error(error);
+//   });
+
+
+// const fetchLlamaResponse = () => {
+//   const groqApiKey = process.env.GROQ_API_KEY
+//   const modelId = 'llama3-8b-8192';
+
+//   const endpoint = 'https://api.groq.com/openai/v1/completions';
+//   const headers = {
+//     'Authorization': `Bearer ${groqApiKey}`,
+//     'Content-Type': 'application/json'
+//   };
+
+//   const requestBody = {
+//     'prompt': 'Your input prompt here', // replace with your input prompt
+//     'max_tokens': 200,
+//     'model': modelId
+//   };
+
+//   axios.post(endpoint, requestBody, { headers: headers })
+//   .then(response => {
+//     console.log(response.data);
+//   })
+//   .catch(error => {
+//     console.error(error);
+//   });
+
+// }
+
+
+
+// app.post(`/llama3-pulsecheck`, async (req, res) => {
+//   const userInput = req.body.prompt;
+// })
+
 
 
 

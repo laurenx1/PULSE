@@ -1,28 +1,40 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ArticleScrape from './ArticleScrape';
 
 const Story = ({ user, clickedArticle }) => {
     const navigate = useNavigate();
+    const [liked, setLiked] = useState(false);
+    const [saved, setSaved] = useState(false);
+
+    useEffect(() => {
+        // Check if the article has been liked or saved already
+        setLiked(user.liked.includes(clickedArticle.id));
+        setSaved(user.saved.includes(clickedArticle.id));
+    }, [clickedArticle.id, user.liked, user.saved]);
 
     const handleGoFeatured = () => {
         navigate(`/${user.id}/featured`);
     };
 
     const handleLike = async () => {
+        if (liked) return; // Prevent multiple likes
         try {
             await axios.post(import.meta.env.VITE_BACKEND_URL + `/api/articles/${clickedArticle.id}/like`, { userId: user.id });
-            console.log('you liked:' + clickedArticle.title);
+            setLiked(true);
+            console.log('You liked: ' + clickedArticle.title);
         } catch (error) {
             console.error('Error liking article:', error);
         }
     };
 
     const handleSave = async () => {
+        if (saved) return; // Prevent multiple saves
         try {
             await axios.post(import.meta.env.VITE_BACKEND_URL + `/api/articles/${clickedArticle.id}/save`, { userId: user.id });
-            console.log('you saved:' + clickedArticle.title);
+            setSaved(true);
+            console.log('You saved: ' + clickedArticle.title);
         } catch (error) {
             console.error('Error saving article:', error);
         }
@@ -43,12 +55,22 @@ const Story = ({ user, clickedArticle }) => {
                 </header>
 
                 <div className="absolute top-16 right-0 flex items-center space-x-2 mr-4 mb-4">
-                    <button className="btn btn-outline btn-primary" onClick={handleLike}>♥</button>
-                    <button className="btn btn-outline btn-secondary" onClick={handleSave}>★</button>
+                    <button 
+                        className={`btn ${liked ? 'btn-primary' : 'btn-outline btn-primary'}`} 
+                        onClick={handleLike}
+                    >
+                        ♥
+                    </button>
+                    <button 
+                        className={`btn ${saved ? 'btn-secondary' : 'btn-outline btn-secondary'}`} 
+                        onClick={handleSave}
+                    >
+                        ★
+                    </button>
                 </div>
             </div>
 
-            <ArticleScrape article={clickedArticle}/>
+            <ArticleScrape article={clickedArticle} />
         </>
     );
 };

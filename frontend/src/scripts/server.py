@@ -1,6 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import scraper 
+from dotenv import load_dotenv
+import scraper
+import os
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
@@ -17,7 +22,6 @@ def scrape():
         return jsonify({"content": content})
     except Exception as e: 
         return jsonify({"error": str(e)}), 500
-
 
 if __name__ == "__main__": 
     app.run(port=5000, debug=True)

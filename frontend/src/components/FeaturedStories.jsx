@@ -24,6 +24,8 @@ const FeaturedStories = ({ user, setClickedArticle }) => {
         const fetchRelatedStories = async () => {
             try {
                 const response = await axios.get(import.meta.env.VITE_BACKEND_URL + `/api/recommendations/${user.id}`);
+                console.log('related stories:')
+                console.log(response.data);
                 setRelatedStories(response.data || []);
             } catch (error) {
                 console.error('Error fetching recommended stories:', error);
@@ -52,6 +54,8 @@ const FeaturedStories = ({ user, setClickedArticle }) => {
         navigate(`/openArticle`); // open the article
     };
 
+
+
     return (
         <div className="p-6 bg-white shadow-md rounded-md space-y-6">
             <h1 className="text-3xl font-bold text-center text-gray-800">Welcome to your daily Featured Stories page!</h1>
@@ -70,17 +74,19 @@ const FeaturedStories = ({ user, setClickedArticle }) => {
             </div>
 
             <div>
-                <h2 className="text-2xl font-bold text-gray-800">Articles Related to Your Preferred Topics</h2>
-                <ul className="space-y-3">
-                    {relatedStories.map((article, index) => (
+            <h2 className="text-2xl font-bold text-gray-800">Articles Related to Your Preferred Topics</h2>
+            <ul className="space-y-3">
+                {relatedStories.map((article, index) => (
+                    article !== null && (
                         <li key={index} className="text-blue-600 hover:text-blue-700">
                             <a href={article.link} target="_blank" rel="noopener noreferrer" onClick={() => handleArticleClick(article)}>
                                 {article.title}
                             </a>
                         </li>
-                    ))}
-                </ul>
-            </div>
+                    )
+                ))}
+            </ul>
+        </div>
         </div>
     );
 };

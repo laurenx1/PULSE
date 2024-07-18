@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const UserProfile = ({ user }) => {
+const UserProfile = ({ user, setViewInteracted }) => {
     const { username, preferredTopics } = user;
     const [topics, setTopics] = useState(preferredTopics);
     const lastRead = user.lastRead; 
@@ -9,8 +9,8 @@ const UserProfile = ({ user }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        setTopics(preferredTopics);
-    }, [preferredTopics, user]); // Update useEffect to depend on preferredTopics
+        setTopics(user.preferredTopics);
+    }, [user.preferredTopics]); // Update useEffect to depend on preferredTopics
 
     const handleSelectTopics = () => {
         navigate(`/${user.id}/topics`);
@@ -29,13 +29,23 @@ const UserProfile = ({ user }) => {
         console.log('going to last read article!');
     }
 
+    const handleViewLiked = () => {
+        setViewInteracted('liked');
+        navigate(`/${user.id}/seeYourContent`)
+    }
+
+    const handleViewSaved = () => {
+        setViewInteracted('saved');
+        navigate(`/${user.id}/seeYourContent`)
+    }
+
     return (
         <div className="container mx-auto px-4 py-8 bg-black min-h-screen">
             <header className="flex items-center justify-between mb-8">
                 <h1 className="text-3xl font-bold text-white">PULSE</h1>
                 <nav className="space-x-1">
-                    <button className="btn text-primary">♥</button>
-                    <button className="btn text-secondary">★</button>
+                    <button className="btn text-primary" onClick={handleViewLiked}>♥</button>
+                    <button className="btn text-secondary" onClick={handleViewSaved}>★</button>
                     <button className="btn text-white" onClick={handleGoFeatured}>Featured Stories</button>
                     <button className="btn text-white" onClick={handleGoPulseCheck}>PULSECHECK</button>
                     <button className="btn text-white">About Us</button>

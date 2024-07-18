@@ -4,7 +4,7 @@ import AIContentDetector from './AIContentDetector';
 import { format } from 'date-fns';
 
 const ArticleScrape = ({ article }) => {
-    const [content, setContent] = useState(''); 
+    const [content, setContent] = useState([]); 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [real, setReal] = useState(null);
@@ -31,8 +31,6 @@ const ArticleScrape = ({ article }) => {
         
         fetchArticle();
 
-
-
         const fetchScores = async () => {
             if (real && fake) {
                 realScore = real; 
@@ -45,8 +43,6 @@ const ArticleScrape = ({ article }) => {
 
     if (loading) return <span className="loading loading-spinner text-primary"></span>;
     if (error) return <div>{error}</div>;
-
-
 
     return (
         <div className="p-4">
@@ -66,10 +62,23 @@ const ArticleScrape = ({ article }) => {
             <div className="bg-info p-4 rounded-lg mb-4">
                 <strong>Description:</strong> {article.description}
             </div>
-            <div>{content}</div>
-            {content && <AIContentDetector content={content} setReal={setReal} setFake={setFake} />}
+            <div>
+                {content
+                    .filter(paragraph => 
+                        paragraph.split(' ').length >= 5 && 
+                        !paragraph.includes('Your browser is') &&
+                        !paragraph.includes('Your browser is')
+                    ) 
+                    .map((paragraph, index) => (
+                        <p key={index}>{paragraph}</p>
+                ))}
+            </div>
+            {content && <AIContentDetector articleId={article.id} content={content.join(' ')} setReal={setReal} setFake={setFake} />}
         </div>
     );
 };
 
 export default ArticleScrape;
+
+
+

@@ -35,9 +35,9 @@ model Article {
   url         String      @unique
   likes       Int         @default(0)
   saves       Int         @default(0)
-  realScore   
-  
-  interactions Interaction[]
+  realScore   Float?      @default(0.0)
+  fakeScore   Float?      @default(0.0)
+  interactions Interaction[] // establishes the reverse relation? 
 }
 
 model Interaction {
