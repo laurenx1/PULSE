@@ -22,7 +22,8 @@ model User {
   interactions   Interaction[] // establishes the reverse relation
   email          String        @unique
   username       String        @unique
-  password       String
+  password       String?
+  picture        String?
 }
 
 model Article {

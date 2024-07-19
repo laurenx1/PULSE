@@ -134,7 +134,6 @@ app.patch('/api/users/:id', async (req, res) => {
       }
 
       res.status(200).send({ message: 'User updated successfully!', user });
-      console.log(data.preferredTopics);
   } catch (error) {
       console.error('Error updating user:', error);
       res.status(500).send({ error: 'Failed to update user.' });
@@ -195,7 +194,6 @@ app.get('/api/articles', async (req, res) => {
 app.post('/api/detect-ai-content-hf', async (req, res) => {
   const { content, articleId } = req.body;
   const hfApiKey = process.env.HF_API_KEY;
-  console.log(content);
   if (!content || !articleId) {
       return res.status(400).json({ error: 'Text and articleId are required.' });
   }
@@ -401,7 +399,6 @@ const apiKey = process.env.NEWS_API_KEY;
 const articles = [];
 
 for (const topic of topics) {
-  console.log(topic);
   try {
     const response = await axios.get('https://newsdata.io/api/1/latest?', {
       params: {
@@ -471,12 +468,11 @@ const calculateUserSimilarity = (user1, user2) => {
 
   const weight1 = 3; // Weight for common likes - middle weight because liked is more relevant than topics chosen when setting up profile
   const weight2 = 4; // Weight for common saves - most weight because saved holds gravity
-  const weight3 = 1; // Weight for common topics - least wegiht because initial interests (can be changed but matters less than the articles)
+  const weight3 = 2; // Weight for common topics - least wegiht because initial interests (can be changed but matters less than the articles)
   const weight4 = 2; 
   const weight5 = 2; 
 
   const similarityScore = (weight1 * commonLikes.length) + (weight2 * commonSaves.length) + (weight3 * commonTopics.length) + (weight4 * commonLikeToSave.length) + (weight5 * commonSaveToLike.length);
-  console.log(similarityScore); 
 
   return similarityScore;
 };
@@ -640,17 +636,12 @@ async function updateArticleKeywords() {
                   where: { id: article.id },
                   data: { keywords },
               });
-              console.log(`Updated article ${article.id} with keywords: ${keywords}`);
-
           }
       }
-
-      console.log('Test update complete.');
   } catch (error) {
       console.error('Error updating keywords:', error);
   } 
 }; 
-
 updateArticleKeywords();
 
 
