@@ -8,7 +8,8 @@ const cron = require('node-cron');
 const axios = require('axios');
 const Replicate = require("replicate");
 const Groq = require("groq-sdk");
-
+const natural = require('natural');
+const stopword = require('stopword');
 
 
 const prisma = new PrismaClient();
@@ -17,6 +18,7 @@ const PORT = 3000;
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const replicate = new Replicate(); 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const tokenizer = new natural.WordTokenizer();
 
 
 app.use(express.json());
@@ -69,6 +71,7 @@ app.post('/api/login', async (req, res) => {
     res.status(500).json({ success: false, error: 'Error logging in' });
   }
 });
+
 
 // Login user woth google
 app.post('/api/google-login', async (req, res) => {
@@ -189,7 +192,6 @@ app.get('/api/articles', async (req, res) => {
 });
 
 
-
 app.post('/api/detect-ai-content-hf', async (req, res) => {
   const { content, articleId } = req.body;
   const hfApiKey = process.env.HF_API_KEY;
@@ -239,7 +241,6 @@ app.post('/api/detect-ai-content-hf', async (req, res) => {
       res.status(500).json({ error: 'Error detecting AI content' });
   }
 });
-
 
 
 // Like an article
@@ -492,6 +493,7 @@ const findSimilarUsers = (targetUser, allUsers, similarityThreshold) => {
   });
 };
 
+
 // recommend articles based on what similar users liked, saved that target user has not interacted with yet. 
 const recommendArticles = (targetUser, similarUsers, allArticles) => {
   const articleScores = {};
@@ -559,82 +561,97 @@ app.get('/api/recommendations/:userId', async (req, res) => {
 
 
 // PULSECHECK stuff
-// async function getGroqChatCompletion(userInput) {
-//   return groq.chat.completions.create({
+// app.post('/generate-pulsecheck-response', async (req, res) => {
+//   // Get the user input from the request body
+//   const userInput = req.body.prompt;
+
+//   // Create a new chat completion request
+//   const request = {
+//     model: 'llama', // or 'gemma' or 'mixtral'
 //     messages: [
 //       {
-//         role: "user",
-//         content: "Explain the importance of fast language models",
+//         role: 'user',
+//         content: userInput,
 //       },
 //     ],
-//     model: "llama3-8b-8192",
-//   });
-// }
-
-
-// async function getLlamaResponse() {
-//   const chatCompletion = await getGroqChatCompletion();
-//   // Print the completion returned by the LLM.
-//   console.log(chatCompletion.choices[0]?.message?.content || "");
-// }
-
-
-
-
-// const endpoint = 'https://api.groq.com/openai/v1/completions';
-// const headers = {
-//   'Authorization': `Bearer ${groqApiKey}`,
-//   'Content-Type': 'application/json'
-// };
-
-
-// const requestBody = {
-//   'prompt': 'Your input prompt here', // replace with your input prompt
-//   'max_tokens': 200,
-//   'model': modelId
-// };
-
-
-// axios.post(endpoint, requestBody, { headers: headers })
-//   .then(response => {
-//     console.log(response.data);
-//   })
-//   .catch(error => {
-//     console.error(error);
-//   });
-
-
-// const fetchLlamaResponse = () => {
-//   const groqApiKey = process.env.GROQ_API_KEY
-//   const modelId = 'llama3-8b-8192';
-
-//   const endpoint = 'https://api.groq.com/openai/v1/completions';
-//   const headers = {
-//     'Authorization': `Bearer ${groqApiKey}`,
-//     'Content-Type': 'application/json'
 //   };
 
-//   const requestBody = {
-//     'prompt': 'Your input prompt here', // replace with your input prompt
-//     'max_tokens': 200,
-//     'model': modelId
-//   };
+//   // Use Axios to send the request to the Groq API
+//   try {
+//     const response = await axios.post('https://api.groq.com/v1/completions', request, {
+//       headers: {
+//         'Authorization': `Bearer ${groq.apiKey}`,
+//         'Content-Type': 'application/json',
+//       },
+//     });
 
-//   axios.post(endpoint, requestBody, { headers: headers })
-//   .then(response => {
-//     console.log(response.data);
-//   })
-//   .catch(error => {
+//     // Extract the completion response
+//     const completionResponse = response.data.completion;
+
+//     // Return the completion response to the client
+//     res.json({ completion: completionResponse });
+//   } catch (error) {
 //     console.error(error);
-//   });
+//     res.status(500).json({ error: 'Failed to complete chat' });
+//   }
+// });
 
-// }
 
 
 
-// app.post(`/llama3-pulsecheck`, async (req, res) => {
-//   const userInput = req.body.prompt;
-// })
+
+
+
+
+
+// keyword sweep to populate Article s.t. every article has keywords extracted
+
+// extract keywords from a title
+const extractKeywords = (title, numKeywords=3) => {
+  const wordCount = {};
+  const words = tokenizer.tokenize(title.toLowerCase()); // convert to lowercase, tokenize into individual words
+  const filteredWords = stopword.removeStopwords(words); // remove common stop words (and, the, etc.)
+
+  filteredWords.forEach(word => {
+    wordCount[word] = (wordCount[word] || 0) + 1; 
+  });
+
+  const sortedWords = Object.entries(wordCount)
+    .sort(([, a], [, b]) => b - a)
+    .map(([word]) => word);
+
+    return sortedWords.slice(0, numKeywords); // return the top numKeywords words from the sorted list.
+};
+
+
+// sweep through articles, fill in keywords field for articles with none. 
+async function updateArticleKeywords() {
+  try {
+      // Fetch all articles
+      const articles = await prisma.article.findMany();
+
+      for (const article of articles) {
+          // Check if the keywords array is empty
+          if (article.keywords.length === 0) {
+              // Extract keywords from the title
+              const keywords = extractKeywords(article.title);
+              // Update the article with the new keywords
+              await prisma.article.update({
+                  where: { id: article.id },
+                  data: { keywords },
+              });
+              console.log(`Updated article ${article.id} with keywords: ${keywords}`);
+
+          }
+      }
+
+      console.log('Test update complete.');
+  } catch (error) {
+      console.error('Error updating keywords:', error);
+  } 
+}; 
+
+updateArticleKeywords();
 
 
 
