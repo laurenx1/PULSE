@@ -38,6 +38,7 @@ model Article {
   saves       Int         @default(0)
   realScore   Float?      @default(0.0)
   fakeScore   Float?      @default(0.0)
+  content     String[]    @default([])
   interactions Interaction[] // establishes the reverse relation? 
 }
 

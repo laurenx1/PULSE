@@ -17,17 +17,21 @@ const ArticleScrape = ({ article }) => {
     useEffect(() => {
         const fetchArticle = async () => {
             try {
-                console.log(url); // undefined, so is article.link
+                // console.log(url); // undefined, so is article.link
                 
-                const response = await axios.get('http://127.0.0.1:5000/scrape', { params: { url } });
-                setContent(response.data.content);
+                // const response = await axios.get('http://127.0.0.1:5000/scrape', { params: { url } });
+                // setContent(response.data.content);
+                setContent(article.content);
             } catch (error) {
                 console.error('Error fetching the article', error);
                 setError('Error fetching the article');
             } finally {
                 setLoading(false);
             }
+
+          
         };
+
 
         fetchArticle();
 

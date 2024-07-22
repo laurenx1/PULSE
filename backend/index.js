@@ -10,6 +10,7 @@ const Replicate = require("replicate");
 const Groq = require("groq-sdk");
 const natural = require('natural');
 const stopword = require('stopword');
+const { scrapeArticle } = require('./scraper');
 
 
 const prisma = new PrismaClient();
@@ -141,36 +142,38 @@ app.patch('/api/users/:id', async (req, res) => {
 });
 
 
-  // Function to fetch and store articles
 const fetchAndStoreArticles = async () => {
   const apiKey = process.env.NEWS_API_KEY;
   try {
-      const response = await axios.get('https://newsdata.io/api/1/latest?', {
-          params: {
-              apikey: apiKey,
-              q: 'breaking',
-              country: 'us',
-          },
-      });
-      const articles = response.data.results || [];
+    const response = await axios.get('https://newsdata.io/api/1/latest?', {
+      params: {
+        apikey: apiKey,
+        q: 'breaking',
+        country: 'us',
+      },
+    });
+    const articles = response.data.results || [];
 
-      for (const article of articles) {
-          await prisma.article.upsert({
-              where: { title: article.title },
-              update: {},
-              create: {
-                  title: article.title,
-                  description: article.description || 'No description available',
-                  author: article.creator || [], // Initialize with an empty array if null
-                  url: article.link,
-                  keywords: article.keywords || [], // Initialize with an empty array if null
-                  publishedAt: new Date(article.pubDate || Date.now()), // Provide current date if pubDate is missing
-              },
-          });
-      }
-      console.log('Articles fetched and stored successfully.');
+    for (const article of articles) {
+      const formattedContent = await scrapeArticle(article.link); // Scrape the content
+
+      await prisma.article.upsert({
+        where: { title: article.title },
+        update: {},
+        create: {
+          title: article.title,
+          description: article.description || 'No description available',
+          author: article.creator || [], // Initialize with an empty array if null
+          url: article.link,
+          keywords: article.keywords || [], // Initialize with an empty array if null
+          publishedAt: new Date(article.pubDate || Date.now()), // Provide current date if pubDate is missing
+          content: formattedContent, // Save the formatted content as an array of paragraphs
+        },
+      });
+    }
+    console.log('Articles fetched and stored successfully.');
   } catch (error) {
-      console.error('Error fetching and storing articles:', error);
+    console.error('Error fetching and storing articles:', error);
   }
 };
 
@@ -395,42 +398,45 @@ const generateFrequencyDictionary = (topics) => {
 
 // fetch and cache articles based on the topics in this frequency dictionary
 const fetchAndCacheArticlesByTopics = async (topics, limit = 3) => {
-const apiKey = process.env.NEWS_API_KEY;
-const articles = [];
+  const apiKey = process.env.NEWS_API_KEY;
+  const articles = [];
 
-for (const topic of topics) {
-  try {
-    const response = await axios.get('https://newsdata.io/api/1/latest?', {
-      params: {
-        apikey: apiKey,
-        q: topic,
-        country: 'us',
-      },
-    });
-
-    const topicArticles = response.data.results || [];
-    articles.push(...topicArticles.slice(0, limit)); // Limit articles per topic
-
-    for (const article of topicArticles) {
-      await prisma.article.upsert({
-        where: { title: article.title },
-        update: {},
-        create: {
-          title: article.title,
-          description: article.description || "no description available",
-          author: article.creator || [],
-          url: article.link,
-          keywords: article.keywords || [],
-          publishedAt: new Date(article.pubDate || Date.now()),
+  for (const topic of topics) {
+    try {
+      const response = await axios.get('https://newsdata.io/api/1/latest?', {
+        params: {
+          apikey: apiKey,
+          q: topic,
+          country: 'us',
         },
       });
-    }
-  } catch (error) {
-    console.error(`Error fetching articles for topic ${topic}:`, error);
-  }
-}
 
-console.log('Articles fetched and cached successfully.');
+      const topicArticles = response.data.results || [];
+      articles.push(...topicArticles.slice(0, limit)); // Limit articles per topic
+
+      for (const article of topicArticles) {
+        const formattedContent = await scrapeArticle(article.link); // Scrape the content
+
+        await prisma.article.upsert({
+          where: { title: article.title },
+          update: {},
+          create: {
+            title: article.title,
+            description: article.description || "No description available",
+            author: article.creator || [],
+            url: article.link,
+            keywords: article.keywords || [],
+            publishedAt: new Date(article.pubDate || Date.now()),
+            content: formattedContent, // Save the formatted content as an array of paragraphs
+          },
+        });
+      }
+    } catch (error) {
+      console.error(`Error fetching articles for topic ${topic}:`, error);
+    }
+  }
+
+  console.log('Articles fetched and cached successfully.');
 };
 
 
@@ -456,6 +462,73 @@ fetchAndStoreArticles();
 };
 
 scheduleArticleFetching();
+
+
+// // Function to fetch articles with empty content
+// const fetchArticlesWithEmptyContent = async () => {
+//   return await prisma.article.findMany({
+//     where: {
+//       content: {
+//         equals: [],
+//       },
+//     },
+//   });
+// };
+
+// // Function to update content for an article
+// const updateArticleContent = async (article) => {
+//   try {
+//     const formattedContent = await scrapeArticle(article.url); // Scrape and clean content
+
+//     await prisma.article.update({
+//       where: { id: article.id },
+//       data: {
+//         content: formattedContent, // Update with the new content
+//       },
+//     });
+
+//     console.log(`Updated content for article ID ${article.id}`);
+//   } catch (error) {
+//     console.error(`Error updating article ID ${article.id}:`, error);
+//   }
+// };
+
+
+// const BATCH_SIZE = 100;
+
+// const updateAllArticlesContent = async () => {
+//   try {
+//     let offset = 0;
+//     let hasMore = true;
+
+//     while (hasMore) {
+//       const articles = await prisma.article.findMany({
+//         where: { content: { equals: [] } },
+//         skip: offset,
+//         take: BATCH_SIZE,
+//       });
+
+//       if (articles.length === 0) {
+//         hasMore = false;
+//         break;
+//       }
+
+//       console.log(`Found ${articles.length} articles with empty content.`);
+
+//       const updatePromises = articles.map(updateArticleContent);
+//       await Promise.all(updatePromises);
+
+//       offset += BATCH_SIZE;
+//     }
+
+//     console.log('All articles updated successfully.');
+//   } catch (error) {
+//     console.error('Error updating articles:', error);
+//   }
+// };
+
+
+// updateAllArticlesContent();
 
 
 // calculate a similarity score between 2 users based on common likes, saves and preferredTopics
@@ -550,47 +623,34 @@ app.get('/api/recommendations/:userId', async (req, res) => {
 
 
 
+// PULSECHECK 
+app.post('/generate-pulsecheck-response', async (req, res) => {
+  // Get the user input from the request body
+  const userInput = req.body.prompt;
 
 
+  try {
+    const response = await groq.chat.completions.create({
+        messages: [
+            {
+                role: 'user', 
+                content: userInput
+            }
+        ],
+        model: 'llama3-8b-8192',
+    }); 
 
+    const llamaRes = response.choices[0].message?.content || "I didn't understand.";
+    
+    res.json({
+        response: llamaRes, 
+    });
+} catch (error) {
+    console.error("Error getting LLaMA-3:", error);
+    res.status(500).json({error: 'error'})
+}
 
-
-
-// PULSECHECK stuff
-// app.post('/generate-pulsecheck-response', async (req, res) => {
-//   // Get the user input from the request body
-//   const userInput = req.body.prompt;
-
-//   // Create a new chat completion request
-//   const request = {
-//     model: 'llama', // or 'gemma' or 'mixtral'
-//     messages: [
-//       {
-//         role: 'user',
-//         content: userInput,
-//       },
-//     ],
-//   };
-
-//   // Use Axios to send the request to the Groq API
-//   try {
-//     const response = await axios.post('https://api.groq.com/v1/completions', request, {
-//       headers: {
-//         'Authorization': `Bearer ${groq.apiKey}`,
-//         'Content-Type': 'application/json',
-//       },
-//     });
-
-//     // Extract the completion response
-//     const completionResponse = response.data.completion;
-
-//     // Return the completion response to the client
-//     res.json({ completion: completionResponse });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Failed to complete chat' });
-//   }
-// });
+});
 
 
 
@@ -643,6 +703,8 @@ async function updateArticleKeywords() {
   } 
 }; 
 updateArticleKeywords();
+
+
 
 
 

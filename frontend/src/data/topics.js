@@ -53,7 +53,7 @@ const newsCategories = [
     { id: 51, name: 'Soccer' },
     { id: 52, name: 'Tesla' },
     { id: 53, name: 'Entertainment' },
-    { id: 53, name: 'Security' },
+    { id: 54, name: 'Security' },
   ];
   
   export default newsCategories;

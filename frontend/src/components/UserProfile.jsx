@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const UserProfile = ({ user, setViewInteracted }) => {
+const UserProfile = ({ user, setViewInteracted}) => {
     const { username, preferredTopics } = user;
     const [topics, setTopics] = useState(preferredTopics);
     const lastRead = user.lastRead; 
