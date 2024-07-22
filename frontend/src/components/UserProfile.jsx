@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import NavBar from './NavBar';
 
 const UserProfile = ({ user, setViewInteracted}) => {
     const { username, preferredTopics } = user;
@@ -16,41 +17,15 @@ const UserProfile = ({ user, setViewInteracted}) => {
         navigate(`/${user.id}/topics`);
     };
 
-    const handleGoFeatured = () => {
-        console.log(user.lastRead);
-        navigate(`/${user.id}/featured`);
-    };
-
-    const handleGoPulseCheck = () => {
-        navigate(`/${user.id}/pulsecheck`);
-    }
-
     const handleLastRead = () => {
         console.log('going to last read article!');
     }
 
-    const handleViewLiked = () => {
-        setViewInteracted('liked');
-        navigate(`/${user.id}/seeYourContent`)
-    }
-
-    const handleViewSaved = () => {
-        setViewInteracted('saved');
-        navigate(`/${user.id}/seeYourContent`)
-    }
+    console.log(user);
 
     return (
         <div className="container mx-auto px-4 py-8 bg-black min-h-screen">
-            <header className="flex items-center justify-between mb-8">
-                <h1 className="text-3xl font-bold text-white">PULSE</h1>
-                <nav className="space-x-1">
-                    <button className="btn text-primary" onClick={handleViewLiked}>♥</button>
-                    <button className="btn text-secondary" onClick={handleViewSaved}>★</button>
-                    <button className="btn text-white" onClick={handleGoFeatured}>Featured Stories</button>
-                    <button className="btn text-white" onClick={handleGoPulseCheck}>PULSECHECK</button>
-                    <button className="btn text-white">About Us</button>
-                </nav>
-            </header>
+            <NavBar user={user} setViewInteracted={setViewInteracted} />
             <div className="bg-black text-white rounded-lg shadow-md p-8">
                 <div className="flex items-center mb-4">
                     <div className="rounded-full bg-gray-700 w-16 h-16"></div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import NavBar from './NavBar';
 
 // Helper function to truncate text to a maximum of 50 words
 const truncateDescription = (description, wordLimit = 50) => {
@@ -12,7 +13,7 @@ const truncateDescription = (description, wordLimit = 50) => {
     return `${words.slice(0, wordLimit).join(' ')}...`;
 };
 
-const FeaturedStories = ({ user, setClickedArticle }) => {
+const FeaturedStories = ({ user, setClickedArticle, setViewInteracted }) => {
     const apiKey = import.meta.env.VITE_NEWSDATA_API_KEY;
     const [topStories, setTopStories] = useState([]);
     const [relatedStories, setRelatedStories] = useState([]);
@@ -85,15 +86,9 @@ const FeaturedStories = ({ user, setClickedArticle }) => {
     return (
         <div className="p-6 bg-black text-white space-y-6">
             <header>
+                <NavBar user={user} setViewInteracted={setViewInteracted}/>
                 <h1 className="text-3xl font-bold text-center">FEATURED STORIES</h1>
                 <p className="text-center">Your breaking news.</p>
-                <nav className="space-x-1">
-                    <button className="btn text-primary" onClick={handleViewLiked}>♥</button>
-                    <button className="btn text-secondary" onClick={handleViewSaved}>★</button>
-                    <button className="btn text-white" onClick={handleGoFeatured}>Featured Stories</button>
-                    <button className="btn text-white" onClick={handleGoPulseCheck}>PULSECHECK</button>
-                    <button className="btn text-white">About Us</button>
-                </nav>
             </header>
             {user.lastRead && (
                 <div className="fixed bottom-0 left-0 right-0 p-4 bg-pink-500 text-white text-center z-50">

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import NavBar from './NavBar';
 
-const PulseCheck = () => {
+const PulseCheck = ({ user, setViewInteracted }) => {
     const navigate = useNavigate();
     const [prompt, setPrompt] = useState('');
     const [response, setResponse] = useState('');
@@ -28,6 +29,7 @@ const PulseCheck = () => {
 
     return (
        <>
+       <NavBar user={user} setViewInteracted={setViewInteracted}/>
        <h1>Welcome to PULSECHECK</h1>
        <div>
         <h1>PulseCheck Test</h1>

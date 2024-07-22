@@ -465,6 +465,7 @@ scheduleArticleFetching();
 
 
 // // Function to fetch articles with empty content
+
 // const fetchArticlesWithEmptyContent = async () => {
 //   return await prisma.article.findMany({
 //     where: {
@@ -529,6 +530,7 @@ scheduleArticleFetching();
 
 
 // updateAllArticlesContent();
+
 
 
 // calculate a similarity score between 2 users based on common likes, saves and preferredTopics

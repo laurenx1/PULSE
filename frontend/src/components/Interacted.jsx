@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import NavBar from './NavBar';
 
-const Interacted = ({ user, viewInteracted }) => {
+const Interacted = ({ user, viewInteracted, setViewInteracted }) => {
     const navigate = useNavigate();
     const [contentType, setContentType] = useState('');
     const [displayedContent, setDisplayedContent] = useState([]);
@@ -44,6 +45,7 @@ const Interacted = ({ user, viewInteracted }) => {
 
     return (
         <div>
+            <NavBar user={user} setViewInteracted={setViewInteracted}/>
             <h3>Here are your {contentType} articles!</h3>
             <ul>
                 {articles.map((article) => (

@@ -30,11 +30,11 @@ function App() {
             <SignIn setUser={setUser}/>
           } />
          {user !== null && <Route path={`/profile/${user.id}`} element={<UserProfile user={user} setViewInteracted={setViewInteracted}/>} />}
-         {user !== null && <Route path={`/${user.id}/featured`} element={<FeaturedStories user={user} setClickedArticle={setClickedArticle}/>} />}
+         {user !== null && <Route path={`/${user.id}/featured`} element={<FeaturedStories user={user} setClickedArticle={setClickedArticle} setViewInteracted={setViewInteracted}/>} />}
          {user !== null && <Route path={`/${user.id}/topics`} element={<TopicSelector user={user} setUser={setUser} />} />}
-         {clickedArticle !== '' && <Route path={`/openArticle`} element={<Story user={user} clickedArticle={clickedArticle}/>}/>}
-         {user !== null && <Route path={`/${user.id}/pulsecheck`} element={<PulseCheck user={user} />} />}
-         {user !== null && (viewInteracted !== '') && <Route path={`/${user.id}/seeYourContent`} element={<Interacted user={user} viewInteracted={viewInteracted}/>} />}
+         {clickedArticle !== '' && <Route path={`/openArticle`} element={<Story user={user} clickedArticle={clickedArticle} setViewInteracted={setViewInteracted}/>}/>}
+         {user !== null && <Route path={`/${user.id}/pulsecheck`} element={<PulseCheck user={user} setViewInteracted={setViewInteracted}/>} />}
+         {user !== null && (viewInteracted !== '') && <Route path={`/${user.id}/seeYourContent`} element={<Interacted user={user} viewInteracted={viewInteracted} setViewInteracted={setViewInteracted}/>} />}
       </Routes>
     </Router>
     </div>
