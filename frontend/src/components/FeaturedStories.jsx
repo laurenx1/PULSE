@@ -2,16 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import NavBar from './NavBar';
+import { truncateText, handleArticleClick } from '../utils/utils';
 
-// Helper function to truncate text to a maximum of 50 words
-const truncateDescription = (description, wordLimit = 50) => {
-    if (!description) return 'No description available';
-    
-    const words = description.split(' ');
-    if (words.length <= wordLimit) return description;
-
-    return `${words.slice(0, wordLimit).join(' ')}...`;
-};
 
 const FeaturedStories = ({ user, setClickedArticle, setViewInteracted }) => {
     const apiKey = import.meta.env.VITE_NEWSDATA_API_KEY;
@@ -50,34 +42,6 @@ const FeaturedStories = ({ user, setClickedArticle, setViewInteracted }) => {
         }
     }, [apiKey, user.preferredTopics]);
 
-    const handleArticleClick = async (article) => {
-        try {
-            await axios.patch(import.meta.env.VITE_BACKEND_URL + `/api/users/${user.id}`, { lastRead: article });
-        } catch (error) {
-            console.error('Error updating last read article:', error);
-        }
-        setClickedArticle(article);
-        navigate(`/openArticle`); // open the article
-    };
-
-    const handleGoFeatured = () => {
-        console.log(user.lastRead);
-        navigate(`/${user.id}/featured`);
-    };
-
-    const handleGoPulseCheck = () => {
-        navigate(`/${user.id}/pulsecheck`);
-    }
-
-    const handleViewLiked = () => {
-        setViewInteracted('liked');
-        navigate(`/${user.id}/seeYourContent`)
-    }
-
-    const handleViewSaved = () => {
-        setViewInteracted('saved');
-        navigate(`/${user.id}/seeYourContent`)
-    }
 
     const firstArticle = topStories.length > 0 ? topStories[0] : null;
     const otherArticles = topStories.length > 1 ? topStories.slice(1) : [];
@@ -94,7 +58,7 @@ const FeaturedStories = ({ user, setClickedArticle, setViewInteracted }) => {
                 <div className="fixed bottom-0 left-0 right-0 p-4 bg-pink-500 text-white text-center z-50">
                     <span>You were reading "{user.lastRead.title}". </span>
                     <button
-                        onClick={() => handleArticleClick(user.lastRead)}
+                        onClick={() => handleArticleClick(user, user.lastRead, setClickedArticle, navigate)}
                         className="underline hover:text-gray-300 transition"
                     >
                         Continue Reading?
@@ -106,13 +70,13 @@ const FeaturedStories = ({ user, setClickedArticle, setViewInteracted }) => {
                 {firstArticle && (
                     <div
                         className="bg-gradient-to-r from-[#2E008E] via-[#98648B] to-[#FCC188] p-6 rounded-lg cursor-pointer hover:opacity-90 hover:scale-105 transition-transform"
-                        onClick={() => handleArticleClick(firstArticle)}
+                        onClick={() => handleArticleClick(user, firstArticle, setClickedArticle, navigate)}
                     >
                         <div className="flex justify-between">
                             <div>
                                 <p className="text-lg font-bold">KEYWORDS: {firstArticle.keywords.join(', ')}</p>
                                 <h2 className="text-3xl font-bold">{firstArticle.title}</h2>
-                                <p>{truncateDescription(firstArticle.description)}</p>
+                                <p>{truncateText(firstArticle.description, 50)}</p>
                             </div>
                             <div className="text-right">
                                 <p className="text-green-500">{firstArticle.realScore.toFixed(4) * 100}% Real Content Score</p>
@@ -127,12 +91,12 @@ const FeaturedStories = ({ user, setClickedArticle, setViewInteracted }) => {
                         <div
                             key={index}
                             className="bg-black border border-white p-4 rounded-lg text-white cursor-pointer hover:bg-gray-800 hover:scale-105 transition-transform"
-                            onClick={() => handleArticleClick(article)}
+                            onClick={() => handleArticleClick(user, article, setClickedArticle, navigate)}
                         >
                             <h3 className="text-xl font-bold">{article.title}</h3>
                             <p className="text-green-500">{article.realScore.toFixed(4) * 100}% Real Content Score</p>
                             <p>{article.author.join(', ')}</p>
-                            <p>{truncateDescription(article.description)}</p>
+                            <p>{truncateText(article.description, 50)}</p>
                         </div>
                     ))}
                 </div>

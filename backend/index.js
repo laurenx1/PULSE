@@ -11,6 +11,7 @@ const Groq = require("groq-sdk");
 const natural = require('natural');
 const stopword = require('stopword');
 const { scrapeArticle } = require('./scraper');
+bodyParser = require('body-parser')
 
 
 const prisma = new PrismaClient();
@@ -22,6 +23,7 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const tokenizer = new natural.WordTokenizer();
 
 
+app.use(bodyParser.json());
 app.use(express.json());
 app.use(cors()); 
 
@@ -609,7 +611,7 @@ app.get('/api/recommendations/:userId', async (req, res) => {
       orderBy: {
         publishedAt: 'desc'
       },
-      take: 200
+      // take: 200
      });
 
     const similarUsers = findSimilarUsers(targetUser, allUsers, similarityThreshold);
@@ -645,7 +647,7 @@ app.post('/generate-pulsecheck-response', async (req, res) => {
     const llamaRes = response.choices[0].message?.content || "I didn't understand.";
     
     res.json({
-        response: llamaRes, 
+        generatedText: llamaRes, 
     });
 } catch (error) {
     console.error("Error getting LLaMA-3:", error);
@@ -653,12 +655,6 @@ app.post('/generate-pulsecheck-response', async (req, res) => {
 }
 
 });
-
-
-
-
-
-
 
 
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import AIContentDetector from './AIContentDetector';
 import { format } from 'date-fns';
+import { fetchArticleContent } from '../utils/utils';
 
 const ArticleScrape = ({ article }) => {
     const [content, setContent] = useState([]);
@@ -15,25 +16,7 @@ const ArticleScrape = ({ article }) => {
     let fakeScore = 'N/A';
 
     useEffect(() => {
-        const fetchArticle = async () => {
-            try {
-                // console.log(url); // undefined, so is article.link
-                
-                // const response = await axios.get('http://127.0.0.1:5000/scrape', { params: { url } });
-                // setContent(response.data.content);
-                setContent(article.content);
-            } catch (error) {
-                console.error('Error fetching the article', error);
-                setError('Error fetching the article');
-            } finally {
-                setLoading(false);
-            }
-
-          
-        };
-
-
-        fetchArticle();
+        fetchArticleContent(setContent, article, setError, setLoading);
 
         const fetchScores = async () => {
             if (real && fake) {
@@ -41,9 +24,10 @@ const ArticleScrape = ({ article }) => {
                 fakeScore = fake;
             }
         }
-
+        
         fetchScores();
     }, [url, real, fake]);
+
 
     if (loading) return <span className="loading loading-spinner text-primary"></span>;
     if (error) return <div>{error}</div>;

@@ -11,7 +11,7 @@ const PulseCheck = ({ user, setViewInteracted }) => {
 
     const handleInputChange = (event) => {
         setPrompt(event.target.value);
-      };
+    };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -19,7 +19,8 @@ const PulseCheck = ({ user, setViewInteracted }) => {
         setError('');
 
         try {
-            const result = await axios.post(import.meta.env.VITE_BACKEND_URL + '/generate-pulsecheck-response', { prompt: prompt });
+            const result = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/generate-pulsecheck-response`, { prompt: prompt });
+            console.log(result.data.generatedText);
             setResponse(result.data.generatedText);
         } catch (err) {
             setError('Failed to generate text');
@@ -28,32 +29,32 @@ const PulseCheck = ({ user, setViewInteracted }) => {
     };
 
     return (
-       <>
-       <NavBar user={user} setViewInteracted={setViewInteracted}/>
-       <h1>Welcome to PULSECHECK</h1>
-       <div>
-        <h1>PulseCheck Test</h1>
-        <form onSubmit={handleSubmit}>
-            <label>
-            Prompt:
-            <input type="text" value={prompt} onChange={handleInputChange} />
-            </label>
-            <button type="submit">Generate</button>
-        </form>
-        {response && (
-            <div>
-            <h2>Generated Response:</h2>
-            <p>{response}</p>
-            </div>
-        )}
-        {error && (
-            <div>
-            <h2>Error:</h2>
-            <p>{error}</p>
-            </div>
-        )}
-    </div>
-       </>
+        <>
+        <NavBar user={user} setViewInteracted={setViewInteracted}/>
+        <h1>Welcome to PULSECHECK</h1>
+        <div>
+            <h1>PulseCheck Test</h1>
+            <form onSubmit={handleSubmit}>
+                <label>
+                    Prompt:
+                    <input type="text" value={prompt} onChange={handleInputChange} />
+                </label>
+                <button type="submit">Generate</button>
+            </form>
+            {response && (
+                <div>
+                    <h2>Generated Response:</h2>
+                    <p>{response}</p>
+                </div>
+            )}
+            {error && (
+                <div>
+                    <h2>Error:</h2>
+                    <p>{error}</p>
+                </div>
+            )}
+        </div>
+    </>
     );
 };
 

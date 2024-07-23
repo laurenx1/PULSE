@@ -8,7 +8,7 @@ import FeaturedStories from './components/FeaturedStories'
 import Story from './components/Story';
 import PulseCheck from './components/PulseCheck';
 import TopicSelector from './components/TopicSelector';
-import Interacted from './components/Interacted';
+import LikedSavedList from './components/LikedSavedList';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -34,7 +34,7 @@ function App() {
          {user !== null && <Route path={`/${user.id}/topics`} element={<TopicSelector user={user} setUser={setUser} />} />}
          {clickedArticle !== '' && <Route path={`/openArticle`} element={<Story user={user} clickedArticle={clickedArticle} setViewInteracted={setViewInteracted}/>}/>}
          {user !== null && <Route path={`/${user.id}/pulsecheck`} element={<PulseCheck user={user} setViewInteracted={setViewInteracted}/>} />}
-         {user !== null && (viewInteracted !== '') && <Route path={`/${user.id}/seeYourContent`} element={<Interacted user={user} viewInteracted={viewInteracted} setViewInteracted={setViewInteracted}/>} />}
+         {user !== null && (viewInteracted !== '') && <Route path={`/${user.id}/seeYourContent`} element={<LikedSavedList user={user} viewInteracted={viewInteracted} setViewInteracted={setViewInteracted} setClickedArticle={setClickedArticle}/>} />}
       </Routes>
     </Router>
     </div>
