@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import AIContentDetector from './AIContentDetector';
 import { format } from 'date-fns';
-import { fetchArticleContent } from '../utils/utils';
+import { fetchArticleContent, handleDetection } from '../utils/utils';
 
 const ArticleScrape = ({ article }) => {
     const [content, setContent] = useState([]);
@@ -18,15 +18,10 @@ const ArticleScrape = ({ article }) => {
     useEffect(() => {
         fetchArticleContent(setContent, article, setError, setLoading);
 
-        const fetchScores = async () => {
-            if (real && fake) {
-                realScore = real;
-                fakeScore = fake;
-            }
-        }
-        
-        fetchScores();
-    }, [url, real, fake]);
+        content && handleDetection(article.content.join(' '), setReal, setFake, article.id);
+
+
+    }, [url, real, fake, content, article.id]);
 
 
     if (loading) return <span className="loading loading-spinner text-primary"></span>;
@@ -60,7 +55,7 @@ const ArticleScrape = ({ article }) => {
                         <p key={index} className="mb-4">{paragraph}</p>
                 ))}
             </div>
-            {content && <AIContentDetector articleId={article.id} content={content.join(' ')} setReal={setReal} setFake={setFake} />}
+
         </div>
     );
 };
