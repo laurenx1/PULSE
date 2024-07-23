@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import newsCategories from "../data/topics";
-import '../style/TopicSelector.css';
 import axios from 'axios';
 
 const TopicSelector = ({ user, setUser }) => {

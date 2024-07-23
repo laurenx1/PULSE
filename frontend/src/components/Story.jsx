@@ -6,7 +6,6 @@ import NavBar from './NavBar';
 import { set } from 'date-fns';
 
 const Story = ({ user, clickedArticle, setViewInteracted }) => {
-    const navigate = useNavigate();
     const [liked, setLiked] = useState(user.liked.includes(clickedArticle.id));
     const [saved, setSaved] = useState(user.saved.includes(clickedArticle.id));
 
@@ -16,9 +15,6 @@ const Story = ({ user, clickedArticle, setViewInteracted }) => {
         setSaved(user.saved.includes(clickedArticle.id));
     }, [clickedArticle.id, user.liked, user.saved]);
 
-    const handleGoFeatured = () => {
-        navigate(`/${user.id}/featured`);
-    };
 
     const handleLike = async () => {
         if (liked) return; // Prevent multiple likes
