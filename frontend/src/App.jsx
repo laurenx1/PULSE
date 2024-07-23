@@ -8,10 +8,13 @@ import FeaturedStories from './components/FeaturedStories'
 import Story from './components/Story';
 import PulseCheck from './components/PulseCheck';
 import TopicSelector from './components/TopicSelector';
+import LikedSavedList from './components/LikedSavedList';
 
 function App() {
   const [user, setUser] = useState(null);
   const [clickedArticle, setClickedArticle] = useState(''); 
+  const [viewInteracted, setViewInteracted] = useState('');
+
 
   return (
     <>
@@ -26,11 +29,12 @@ function App() {
           <Route path='/login' element={
             <SignIn setUser={setUser}/>
           } />
-         {user !== null && <Route path={`/profile/${user.id}`} element={<UserProfile user={user} />} />}
-         {user !== null && <Route path={`/${user.id}/featured`} element={<FeaturedStories user={user} setClickedArticle={setClickedArticle}/>} />}
-         {user !== null && <Route path={`/${user.id}/topics`} element={<TopicSelector user={user} />} />}
-         {clickedArticle !== '' && <Route path={`/openArticle`} element={<Story user={user} clickedArticle={clickedArticle}/>}/>}
-         {user !== null && <Route path={`/${user.id}/pulsecheck`} element={<PulseCheck user={user} />} />}
+         {user !== null && <Route path={`/profile/${user.id}`} element={<UserProfile user={user} setViewInteracted={setViewInteracted}/>} />}
+         {user !== null && <Route path={`/${user.id}/featured`} element={<FeaturedStories user={user} setClickedArticle={setClickedArticle} setViewInteracted={setViewInteracted}/>} />}
+         {user !== null && <Route path={`/${user.id}/topics`} element={<TopicSelector user={user} setUser={setUser} />} />}
+         {clickedArticle !== '' && <Route path={`/openArticle`} element={<Story user={user} clickedArticle={clickedArticle} setViewInteracted={setViewInteracted}/>}/>}
+         {user !== null && <Route path={`/${user.id}/pulsecheck`} element={<PulseCheck user={user} setViewInteracted={setViewInteracted}/>} />}
+         {user !== null && (viewInteracted !== '') && <Route path={`/${user.id}/seeYourContent`} element={<LikedSavedList user={user} viewInteracted={viewInteracted} setViewInteracted={setViewInteracted} setClickedArticle={setClickedArticle}/>} />}
       </Routes>
     </Router>
     </div>

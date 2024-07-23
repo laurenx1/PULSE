@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import NavBar from './NavBar';
 
-const UserProfile = ({ user }) => {
+const UserProfile = ({ user, setViewInteracted}) => {
     const { username, preferredTopics } = user;
     const [topics, setTopics] = useState(preferredTopics);
     const lastRead = user.lastRead; 
@@ -9,38 +10,22 @@ const UserProfile = ({ user }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        setTopics(preferredTopics);
-    }, [preferredTopics]);
+        setTopics(user.preferredTopics);
+    }, [user.preferredTopics]); // Update useEffect to depend on preferredTopics
 
     const handleSelectTopics = () => {
         navigate(`/${user.id}/topics`);
     };
 
-    const handleGoFeatured = () => {
-        console.log(user.lastRead);
-        navigate(`/${user.id}/featured`);
-    };
-
-    const handleGoPulseCheck = () => {
-        navigate(`/${user.id}/pulsecheck`);
-    }
-
     const handleLastRead = () => {
         console.log('going to last read article!');
     }
 
+    console.log(user);
+
     return (
         <div className="container mx-auto px-4 py-8 bg-black min-h-screen">
-            <header className="flex items-center justify-between mb-8">
-                <h1 className="text-3xl font-bold text-white">PULSE</h1>
-                <nav className="space-x-1">
-                    <button className="btn text-primary">♥</button>
-                    <button className="btn text-secondary">★</button>
-                    <button className="btn text-white" onClick={handleGoFeatured}>Featured Stories</button>
-                    <button className="btn text-white" onClick={handleGoPulseCheck}>PULSECHECK</button>
-                    <button className="btn text-white">About Us</button>
-                </nav>
-            </header>
+            <NavBar user={user} setViewInteracted={setViewInteracted} />
             <div className="bg-black text-white rounded-lg shadow-md p-8">
                 <div className="flex items-center mb-4">
                     <div className="rounded-full bg-gray-700 w-16 h-16"></div>
@@ -52,7 +37,6 @@ const UserProfile = ({ user }) => {
                     <p className="text-green-400 mb-2">• No AI generated content</p>
                     <p className="text-white-400">{lastRead.creator}</p>
                     <p className="text-gray-400">{lastRead.description}</p>
-            
                 </div>
                 <div className="bg-gradient-to-r from-[#2E008E] via-[#7042D2] to-[#FCC188] rounded-lg p-4 mb-8">
                     <h3 className="text-lg font-bold mb-4">YOUR PULSE POINTS</h3>
