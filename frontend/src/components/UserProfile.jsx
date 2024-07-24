@@ -48,7 +48,7 @@ const UserProfile = ({ user, setViewInteracted}) => {
                     <h3 className="text-lg font-bold mb-4">YOUR PULSE POINTS</h3>
                     <div className="grid grid-cols-2 gap-4">
                         {topics.map(topic => (
-                            <button key={topic} className="bg-black text-white p-4 rounded-lg text-center ">{topic}</button>
+                            <button key={topic} className="bg-black text-white p-4 rounded-lg text-center hover:opacity-50">{topic}</button>
                         ))}
                     </div>
                 </div>
