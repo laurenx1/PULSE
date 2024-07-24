@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
+import Marquee from './Marquee';
+import { removeStopwordsFromArray, truncateText } from '../utils/utils';
 
 const UserProfile = ({ user, setViewInteracted}) => {
     const { username, preferredTopics } = user;
     const [topics, setTopics] = useState(preferredTopics);
     const lastRead = user.lastRead; 
-
     const navigate = useNavigate();
 
     useEffect(() => {
+        // change this to be a fetch call to backend to get topics again
         setTopics(user.preferredTopics);
+
     }, [user.preferredTopics]); // Update useEffect to depend on preferredTopics
 
     const handleSelectTopics = () => {
@@ -21,7 +24,10 @@ const UserProfile = ({ user, setViewInteracted}) => {
         console.log('going to last read article!');
     }
 
-    console.log(user);
+
+
+    const processedTopics = removeStopwordsFromArray(user.preferredTopics)
+    console.log(processedTopics);
 
     return (
         <div className="container mx-auto px-4 py-8 bg-black min-h-screen">
@@ -36,7 +42,7 @@ const UserProfile = ({ user, setViewInteracted}) => {
                     <h4 className="text-2xl font-bold mb-2">{lastRead.title}</h4>
                     <p className="text-green-400 mb-2">• No AI generated content</p>
                     <p className="text-white-400">{lastRead.creator}</p>
-                    <p className="text-gray-400">{lastRead.description}</p>
+                    <p className="text-gray-400">{truncateText(lastRead.description, 50)}</p>
                 </div>
                 <div className="bg-gradient-to-r from-[#2E008E] via-[#7042D2] to-[#FCC188] rounded-lg p-4 mb-8">
                     <h3 className="text-lg font-bold mb-4">YOUR PULSE POINTS</h3>
@@ -51,6 +57,7 @@ const UserProfile = ({ user, setViewInteracted}) => {
                     <button className="btn btn-primary bg-[#EB73CB] rounded-lg px-4 py-2">See updates on your most recently asked question</button>
                 </div>
             </div>
+            <Marquee user={user}/>
         </div>
     );
 };

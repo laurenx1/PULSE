@@ -20,7 +20,6 @@ const PulseCheck = ({ user, setViewInteracted }) => {
 
         try {
             const result = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/generate-pulsecheck-response`, { prompt: prompt });
-            console.log(result.data.generatedText);
             setResponse(result.data.generatedText);
         } catch (err) {
             setError('Failed to generate text');

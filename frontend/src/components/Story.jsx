@@ -21,7 +21,6 @@ const Story = ({ user, clickedArticle, setViewInteracted }) => {
         try {
             await axios.post(import.meta.env.VITE_BACKEND_URL + `/api/articles/${clickedArticle.id}/like`, { userId: user.id });
             setLiked(true);
-            console.log('You liked: ' + clickedArticle.title);
         } catch (error) {
             console.error('Error liking article:', error);
         }
@@ -32,7 +31,6 @@ const Story = ({ user, clickedArticle, setViewInteracted }) => {
         try {
             await axios.post(import.meta.env.VITE_BACKEND_URL + `/api/articles/${clickedArticle.id}/save`, { userId: user.id });
             setSaved(true);
-            console.log('You saved: ' + clickedArticle.title);
         } catch (error) {
             console.error('Error saving article:', error);
         }

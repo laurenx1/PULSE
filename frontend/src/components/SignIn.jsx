@@ -31,7 +31,6 @@ const SignIn = ({ setUser }) => {
                     }
                 });
                 const data = response.data;
-                console.log(data);
                 handleVerifiedAccount(data.user);
             } else {
                 const response = await axios.post(import.meta.env.VITE_BACKEND_URL + '/api/login', {
@@ -43,7 +42,6 @@ const SignIn = ({ setUser }) => {
                     }
                 });
                 const data = response.data;
-                console.log(data);
                 handleVerifiedAccount(data.user);
             }
         } catch (error) {
@@ -58,7 +56,6 @@ const SignIn = ({ setUser }) => {
                 token: credential
             });
             const data = res.data;
-            console.log(data);
             handleVerifiedAccount(data.user);
         } catch (error) {
             console.error('Error with Google login', error);

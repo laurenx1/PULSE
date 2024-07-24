@@ -17,7 +17,6 @@ const FeaturedStories = ({ user, setClickedArticle, setViewInteracted }) => {
             try {
                 const response = await axios.get(import.meta.env.VITE_BACKEND_URL + '/api/articles');
                 setTopStories(response.data || []);
-                console.log(topStories);
             } catch (error) {
                 console.error('Error fetching top stories:', error);
             }
@@ -28,7 +27,6 @@ const FeaturedStories = ({ user, setClickedArticle, setViewInteracted }) => {
             try {
                 const response = await axios.get(import.meta.env.VITE_BACKEND_URL + `/api/recommendations/${user.id}`);
                 setRelatedStories((response.data || []).filter(story => story !== null));
-                console.log(relatedStories);
             } catch (error) {
                 console.error('Error fetching recommended stories:', error);
             }

@@ -360,6 +360,53 @@ app.get('/api/interactedArticles', async (req, res) => {
 });
 
 
+// Function to fetch title of most recent articles for each topic 
+// @TODO: filter out null values
+const getMostRecentArticlesByKeywords = async (keywords, limit = 2) => {
+  const articlesByKeyword = {};
+
+  for (const keyword of keywords.map(k => k.toLowerCase())) {
+      const articles = await prisma.article.findMany({
+          where: {
+              keywords: {
+                  has: keyword
+              }
+          },
+          orderBy: {
+              publishedAt: 'desc'
+          },
+          take: limit
+      });
+
+      if (articles.length > 0) {
+          articlesByKeyword[keyword] = articles.map(article => article.title);
+      }
+  }
+  console.log(articlesByKeyword);
+  return articlesByKeyword;
+};
+
+
+
+// get article headlines for marquee
+app.get(`/relevant-articles`, async (req, res) => {
+  const { topics } = req.query;
+
+  if (!topics) {
+    return res.status(400).json({ error: 'Topics parameter is required' });
+  }
+
+  try {
+    const topicsArray = Array.isArray(topics) ? topics : topics.split(','); // Ensure topics is an array
+    const articles = await getMostRecentArticlesByKeywords(topicsArray);
+    res.json(articles);
+  } catch (error) {
+    console.error('Error fetching headlines: ', error);
+    res.status(500).json({ error: 'Error fetching headlines' });
+  }
+});
+
+
 
 
 

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import AIContentDetector from './AIContentDetector';
 import { format } from 'date-fns';
 import { fetchArticleContent, handleDetection } from '../utils/utils';
 
@@ -12,8 +11,6 @@ const ArticleScrape = ({ article }) => {
     const [fake, setFake] = useState(null);
 
     const url = article.url || article.link;
-    let realScore = 'N/A';
-    let fakeScore = 'N/A';
 
     useEffect(() => {
         fetchArticleContent(setContent, article, setError, setLoading);
