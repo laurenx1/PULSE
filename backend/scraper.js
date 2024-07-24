@@ -1,24 +1,33 @@
 const axios = require('axios');
 const { JSDOM } = require('jsdom');
 
-// Function to clean and format text content
+/**
+ * Cleans and formats the text content by removing extra whitespaces, special characters, and non-ASCII characters.
+ * @param {string} content - The raw HTML content.
+ * @returns {string[]} - An array of cleaned and formatted text segments.
+ */
 const cleanText = (content) => {
     const dom = new JSDOM(content);
     const paragraphs = dom.window.document.querySelectorAll('p');
 
-    const textArray = Array.from(paragraphs).map(para => {
-        let text = para.textContent;
-        text = text.replace(/\s+/g, ' '); // replace multiple whitespaces with one
-        text = text.replace(/’/g, "'"); // replace special character
-        text = text.replace(/[^\x00-\x7F]+/g, ' '); // remove non-ASCII characters
-        const sentences = text.split('.').filter(sentence => sentence.length > 0);
-        return sentences.join('.\n\n');
-    });
+    return Array.from(paragraphs).map(paragraph => {
+        let text = paragraph.textContent;
 
-    return textArray;
+        // Normalize whitespace and replace special characters
+        text = text.replace(/\s+/g, ' ').trim();
+        text = text.replace(/’/g, "'");
+        text = text.replace(/[^\x00-\x7F]+/g, ' ');
+
+        // Split text into sentences and format
+        return text.split('.').filter(Boolean).join('.\n\n');
+    });
 };
 
-// Function to scrape and clean article content
+/**
+ * Scrapes and cleans the article content from a given URL.
+ * @param {string} url - The URL of the article to scrape.
+ * @returns {Promise<string[]>} - A promise that resolves to an array of cleaned text segments.
+ */
 const scrapeArticle = async (url) => {
     try {
         const response = await axios.get(url, {
@@ -29,11 +38,9 @@ const scrapeArticle = async (url) => {
         });
 
         const content = response.data;
-        const formattedContent = cleanText(content); // Clean and format content
-
-        return formattedContent;
+        return cleanText(content); // Clean and format content
     } catch (error) {
-        console.error('Error scraping article:', error);
+        console.error(`Error scraping article from ${url}:`, error.message);
         return [`Error: ${error.message}`];
     }
 };
