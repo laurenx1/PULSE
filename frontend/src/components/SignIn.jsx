@@ -21,7 +21,7 @@ const SignIn = ({ setUser }) => {
         try {
             if (isSignUp) {
                 // Handle sign up
-                const response = await axios.post(import.meta.env.VITE_BACKEND_URL + '/api/register', {
+                const response = await axios.post(import.meta.env.VITE_BACKEND_URL + '/auth/register', {
                     email,
                     username,
                     password
@@ -33,7 +33,7 @@ const SignIn = ({ setUser }) => {
                 const data = response.data;
                 handleVerifiedAccount(data.user);
             } else {
-                const response = await axios.post(import.meta.env.VITE_BACKEND_URL + '/api/login', {
+                const response = await axios.post(import.meta.env.VITE_BACKEND_URL + '/auth/login', {
                     email,
                     password
                 }, {
@@ -52,7 +52,7 @@ const SignIn = ({ setUser }) => {
     const handleGoogleSuccess = async (response) => {
         const { credential } = response;
         try {
-            const res = await axios.post(import.meta.env.VITE_BACKEND_URL + '/api/google-login', {
+            const res = await axios.post(import.meta.env.VITE_BACKEND_URL + '/auth/google-login', {
                 token: credential
             });
             const data = res.data;
