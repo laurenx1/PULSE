@@ -609,6 +609,7 @@ app.get('/api/recommendations/:userId', async (req, res) => {
 app.post('/generate-pulsecheck-response', async (req, res) => {
   // Get the user input from the request body
   const userInput = req.body.prompt;
+  const prompt = "Current events: four questions one could ask google about (and an array of 5 single-word keywords for each question): ";
 
 
   try {
@@ -616,7 +617,7 @@ app.post('/generate-pulsecheck-response', async (req, res) => {
         messages: [
             {
                 role: 'user', 
-                content: userInput
+                content: prompt + userInput
             }
         ],
         model: 'llama3-8b-8192',

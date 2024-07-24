@@ -26,7 +26,7 @@ const Marquee = ({ user }) => {
         };
 
         fetchHeadlinesForMarquee(); 
-    }, [user.preferredTopics]);
+    }, [user.preferredTopics, user]);
     
     if (loading) {
         return <div className="marquee">Loading headlines...</div>; // Display a loading message or spinner
