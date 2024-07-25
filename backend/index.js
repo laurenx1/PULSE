@@ -13,7 +13,8 @@ const stopword = require('stopword');
 bodyParser = require('body-parser');
 
 const { scrapeArticle } = require('./scraper');
-const { getAllPreferredTopics, generateFrequencyDictionary, calculateUserSimilarity, findSimilarUsers, recommendArticles } = require('./recommendUtils');
+const { getAllPreferredTopics, generateFrequencyDictionary, findSimilarUsers, recommendArticles } = require('./recommendUtils');
+const { updateArticleKeywords} = require('./keywordExtract')
 const authRoutes = require('./authRoutes');
 const pulsecheckRoutes = require('./pulsecheckRoutes')
 const userActionRoutes = require('./userActionRoutes')
@@ -96,7 +97,7 @@ app.get('/api/articles', async (req, res) => {
   }
 });
 
-
+// @TODO: move to separate file
 app.post('/api/detect-ai-content-hf', async (req, res) => {
   const { content, articleId } = req.body;
   const hfApiKey = process.env.HF_API_KEY;
@@ -145,7 +146,6 @@ app.post('/api/detect-ai-content-hf', async (req, res) => {
       res.status(500).json({ error: 'Error detecting AI content' });
   }
 });
-
 
 
 // view liked or saved articles 
@@ -221,9 +221,6 @@ app.get(`/relevant-articles`, async (req, res) => {
 });
 
 
-
-
-
 // fetch and cache articles based on the topics in this frequency dictionary
 const fetchAndCacheArticlesByTopics = async (topics, limit = 3) => {
   const apiKey = process.env.NEWS_API_KEY;
@@ -263,7 +260,7 @@ const fetchAndCacheArticlesByTopics = async (topics, limit = 3) => {
       console.error(`Error fetching articles for topic ${topic}:`, error);
     }
   }
-
+  updateArticleKeywords();
   console.log('Articles fetched and cached successfully.');
 };
 
@@ -332,51 +329,50 @@ app.get('/api/recommendations/:userId', async (req, res) => {
 
 
 
+// @TODO: move to separate file 
+// // keyword sweep to populate Article s.t. every article has keywords extracted
+// // extract keywords from a title
+// const extractKeywords = (title, numKeywords=5) => {
+//   const wordCount = {};
+//   const words = tokenizer.tokenize(title.toLowerCase()); // convert to lowercase, tokenize into individual words
+//   const filteredWords = stopword.removeStopwords(words); // remove common stop words (and, the, etc.)
 
-// keyword sweep to populate Article s.t. every article has keywords extracted
+//   filteredWords.forEach(word => {
+//     wordCount[word] = (wordCount[word] || 0) + 1; 
+//   });
 
-// extract keywords from a title
-const extractKeywords = (title, numKeywords=5) => {
-  const wordCount = {};
-  const words = tokenizer.tokenize(title.toLowerCase()); // convert to lowercase, tokenize into individual words
-  const filteredWords = stopword.removeStopwords(words); // remove common stop words (and, the, etc.)
+//   const sortedWords = Object.entries(wordCount)
+//     .sort(([, a], [, b]) => b - a)
+//     .map(([word]) => word);
 
-  filteredWords.forEach(word => {
-    wordCount[word] = (wordCount[word] || 0) + 1; 
-  });
-
-  const sortedWords = Object.entries(wordCount)
-    .sort(([, a], [, b]) => b - a)
-    .map(([word]) => word);
-
-    return sortedWords.slice(0, numKeywords); // return the top numKeywords words from the sorted list.
-};
+//     return sortedWords.slice(0, numKeywords); // return the top numKeywords words from the sorted list.
+// };
 
 
-// sweep through articles, fill in keywords field for articles with none. 
-async function updateArticleKeywords() {
-  try {
-      // Fetch all articles
-      const articles = await prisma.article.findMany();
+// // sweep through articles, fill in keywords field for articles with none. 
+// async function updateArticleKeywords() {
+//   try {
+//       // Fetch all articles
+//       const articles = await prisma.article.findMany();
 
-      for (const article of articles) {
-          // Check if the keywords array is empty
-          if (article.keywords.length === 0) {
-              // Extract keywords from the title
-              const keywords = extractKeywords(article.title);
-              // Update the article with the new keywords
-              await prisma.article.update({
-                  where: { id: article.id },
-                  data: { keywords },
-              });
-          }
-      }
-  } catch (error) {
-      console.error('Error updating keywords:', error);
-  } 
-}; 
+//       for (const article of articles) {
+//           // Check if the keywords array is empty
+//           if (article.keywords.length === 0) {
+//               // Extract keywords from the title
+//               const keywords = extractKeywords(article.title);
+//               // Update the article with the new keywords
+//               await prisma.article.update({
+//                   where: { id: article.id },
+//                   data: { keywords },
+//               });
+//           }
+//       }
+//   } catch (error) {
+//       console.error('Error updating keywords:', error);
+//   } 
+// }; 
 
-updateArticleKeywords();
+// updateArticleKeywords();
 
 
 

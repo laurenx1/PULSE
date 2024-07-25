@@ -1,6 +1,5 @@
 
 const { PrismaClient } = require('@prisma/client');
-
 const prisma = new PrismaClient();
 
 
@@ -95,4 +94,4 @@ const calculateUserSimilarity = (user1, user2) => {
     return sortedArticleIds.map(articleId => allArticles.find(article => article.id === parseInt(articleId)));
   };
 
-  module.exports = { getAllPreferredTopics, generateFrequencyDictionary, calculateUserSimilarity, findSimilarUsers, recommendArticles };
+  module.exports = { getAllPreferredTopics, generateFrequencyDictionary, findSimilarUsers, recommendArticles };
