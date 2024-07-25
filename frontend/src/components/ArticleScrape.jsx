@@ -14,10 +14,7 @@ const ArticleScrape = ({ article }) => {
 
     useEffect(() => {
         fetchArticleContent(setContent, article, setError, setLoading);
-
         content && handleDetection(article.content.join(' '), setReal, setFake, article.id);
-
-
     }, [url, real, fake, content, article.id]);
 
 

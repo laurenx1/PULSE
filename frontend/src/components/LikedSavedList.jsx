@@ -8,7 +8,6 @@ import { truncateText, handleArticleClick } from '../utils/utils';
 const LikedSavedList = ({ user, viewInteracted, setViewInteracted, setClickedArticle }) => {
     const navigate = useNavigate();
     const [contentType, setContentType] = useState('');
-    const [displayedContent, setDisplayedContent] = useState([]);
     const [articles, setArticles] = useState([]);
 
     useEffect(() => {
@@ -28,14 +27,17 @@ const LikedSavedList = ({ user, viewInteracted, setViewInteracted, setClickedArt
             }
         };
 
+        /**
+         * LikedSavedList can be used to display either liked or saved content
+         * @description: sets interaction type so backend recieves request for either liked
+         * or saved content
+         *  */ 
         const setInteractionType = () => {
             if (viewInteracted === 'liked') {
                 setContentType('liked');
-                setDisplayedContent(user.liked);
                 fetchInteractedArticles();
             } else if (viewInteracted === 'saved') {
                 setContentType('saved');
-                setDisplayedContent(user.saved);
                 fetchInteractedArticles();
             } else {
                 setContentType('');

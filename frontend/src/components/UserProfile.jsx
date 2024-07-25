@@ -2,24 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import Marquee from './Marquee';
-import { removeStopwordsFromArray, truncateText, handleArticleClick } from '../utils/utils';
+import { truncateText, handleArticleClick } from '../utils/utils';
 
 const UserProfile = ({ user, setViewInteracted, clickedArticle, setClickedArticle, topics}) => {
-    const { username, preferredTopics } = user;
-    // const [topics, setTopics] = useState(preferredTopics);
-    const selectedTopics = topics.length !== 0 ? topics : user.preferredTopics;
-
-
-    console.log("THE TOPICS YOU CHOSE", selectedTopics);
     const navigate = useNavigate();
 
-    const lastRead = clickedArticle || user.lastRead;
+    const { username, preferredTopics } = user;
+    const selectedTopics = topics.length !== 0 ? topics : user.preferredTopics;
 
-    // useEffect(() => {
-    //     // change this to be a fetch call to backend to get topics again
-    //     setTopics(user.preferredTopics);
+    /**
+     * @description: lastRead article will always be the lastClicked article
+     * clickedArticle has useState of null, so gets lastRead from user data when this occurs
+     * which is on first render after sign in
+     */
+    const lastRead = clickedArticle || user.lastRead; 
 
-    // }, [user.preferredTopics]); // Update useEffect to depend on preferredTopics
 
     const handleSelectTopics = () => {
         navigate(`/${user.id}/topics`);
@@ -29,12 +26,6 @@ const UserProfile = ({ user, setViewInteracted, clickedArticle, setClickedArticl
         console.log('going to last read article!');
         handleArticleClick(user, lastRead, setClickedArticle, navigate);
     }
-
-    console.log(lastRead);
-
-
-    const processedTopics = removeStopwordsFromArray(user.preferredTopics)
-    console.log(processedTopics);
 
     return (
         <div className="container mx-auto px-4 py-8 bg-black min-h-screen">
