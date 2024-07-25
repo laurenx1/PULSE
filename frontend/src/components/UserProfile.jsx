@@ -1,17 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
+import Marquee from './Marquee';
+import { handleArticleClick } from '../utils/utils';
+import { truncateText } from '../utils/textUtils';
 
-const UserProfile = ({ user, setViewInteracted}) => {
-    const { username, preferredTopics } = user;
-    const [topics, setTopics] = useState(preferredTopics);
-    const lastRead = user.lastRead; 
-
+const UserProfile = ({ user, setViewInteracted, clickedArticle, setClickedArticle, topics}) => {
     const navigate = useNavigate();
 
-    useEffect(() => {
-        setTopics(user.preferredTopics);
-    }, [user.preferredTopics]); // Update useEffect to depend on preferredTopics
+    const { username, preferredTopics } = user;
+    const selectedTopics = topics.length !== 0 ? topics : user.preferredTopics;
+
+    /**
+     * @description: lastRead article will always be the lastClicked article
+     * clickedArticle has useState of null, so gets lastRead from user data when this occurs
+     * which is on first render after sign in
+     */
+    const lastRead = clickedArticle || user.lastRead; 
+
 
     const handleSelectTopics = () => {
         navigate(`/${user.id}/topics`);
@@ -19,9 +25,8 @@ const UserProfile = ({ user, setViewInteracted}) => {
 
     const handleLastRead = () => {
         console.log('going to last read article!');
+        handleArticleClick(user, lastRead, setClickedArticle, navigate);
     }
-
-    console.log(user);
 
     return (
         <div className="container mx-auto px-4 py-8 bg-black min-h-screen">
@@ -36,13 +41,13 @@ const UserProfile = ({ user, setViewInteracted}) => {
                     <h4 className="text-2xl font-bold mb-2">{lastRead.title}</h4>
                     <p className="text-green-400 mb-2">• No AI generated content</p>
                     <p className="text-white-400">{lastRead.creator}</p>
-                    <p className="text-gray-400">{lastRead.description}</p>
+                    <p className="text-gray-400">{truncateText(lastRead.description, 50)}</p>
                 </div>
                 <div className="bg-gradient-to-r from-[#2E008E] via-[#7042D2] to-[#FCC188] rounded-lg p-4 mb-8">
                     <h3 className="text-lg font-bold mb-4">YOUR PULSE POINTS</h3>
                     <div className="grid grid-cols-2 gap-4">
-                        {topics.map(topic => (
-                            <button key={topic} className="bg-black text-white p-4 rounded-lg text-center ">{topic}</button>
+                        {selectedTopics.map(topic => (
+                            <button key={topic} className="bg-black text-white p-4 rounded-lg text-center hover:opacity-50">{topic}</button>
                         ))}
                     </div>
                 </div>
@@ -51,6 +56,7 @@ const UserProfile = ({ user, setViewInteracted}) => {
                     <button className="btn btn-primary bg-[#EB73CB] rounded-lg px-4 py-2">See updates on your most recently asked question</button>
                 </div>
             </div>
+            <Marquee user={user}/>
         </div>
     );
 };

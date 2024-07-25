@@ -2,7 +2,6 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const NavBar = ({user, setViewInteracted }) => {
-    console.log(user);
     const navigate = useNavigate();
 
     const handleGoFeatured = () => {

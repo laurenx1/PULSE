@@ -6,7 +6,6 @@ import NavBar from './NavBar';
 import { set } from 'date-fns';
 
 const Story = ({ user, clickedArticle, setViewInteracted }) => {
-    const navigate = useNavigate();
     const [liked, setLiked] = useState(user.liked.includes(clickedArticle.id));
     const [saved, setSaved] = useState(user.saved.includes(clickedArticle.id));
 
@@ -16,16 +15,12 @@ const Story = ({ user, clickedArticle, setViewInteracted }) => {
         setSaved(user.saved.includes(clickedArticle.id));
     }, [clickedArticle.id, user.liked, user.saved]);
 
-    const handleGoFeatured = () => {
-        navigate(`/${user.id}/featured`);
-    };
 
     const handleLike = async () => {
         if (liked) return; // Prevent multiple likes
         try {
-            await axios.post(import.meta.env.VITE_BACKEND_URL + `/api/articles/${clickedArticle.id}/like`, { userId: user.id });
+            await axios.post(import.meta.env.VITE_BACKEND_URL + `/update/articles/${clickedArticle.id}/like`, { userId: user.id });
             setLiked(true);
-            console.log('You liked: ' + clickedArticle.title);
         } catch (error) {
             console.error('Error liking article:', error);
         }
@@ -34,9 +29,8 @@ const Story = ({ user, clickedArticle, setViewInteracted }) => {
     const handleSave = async () => {
         if (saved) return; // Prevent multiple saves
         try {
-            await axios.post(import.meta.env.VITE_BACKEND_URL + `/api/articles/${clickedArticle.id}/save`, { userId: user.id });
+            await axios.post(import.meta.env.VITE_BACKEND_URL + `/update/articles/${clickedArticle.id}/save`, { userId: user.id });
             setSaved(true);
-            console.log('You saved: ' + clickedArticle.title);
         } catch (error) {
             console.error('Error saving article:', error);
         }

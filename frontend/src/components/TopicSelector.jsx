@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import newsCategories from "../data/topics";
-import '../style/TopicSelector.css';
 import axios from 'axios';
 
-const TopicSelector = ({ user, setUser }) => {
+const TopicSelector = ({ user, setTopics }) => {
     const navigate = useNavigate();
     const [selectedTopics, setSelectedTopics] = useState(user.preferredTopics);
 
@@ -18,8 +17,8 @@ const TopicSelector = ({ user, setUser }) => {
 
     const handleSubmit = async () => {
         try {
-            await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/api/users/${user.id}`, { preferredTopics: selectedTopics });
-            setUser(user);
+            await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/update/users/${user.id}`, { preferredTopics: selectedTopics });
+            setTopics(selectedTopics);
             navigate(`/profile/${user.id}`);
         } catch (error) {
             console.error('Error updating preferred topics:', error);

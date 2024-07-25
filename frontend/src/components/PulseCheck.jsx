@@ -6,8 +6,9 @@ import NavBar from './NavBar';
 const PulseCheck = ({ user, setViewInteracted }) => {
     const navigate = useNavigate();
     const [prompt, setPrompt] = useState('');
-    const [response, setResponse] = useState('');
+    const [questions, setQuestions] = useState([]);
     const [error, setError] = useState('');
+    const [questionKeywords, setQuestionKeywords] = useState([]);
 
     const handleInputChange = (event) => {
         setPrompt(event.target.value);
@@ -15,13 +16,13 @@ const PulseCheck = ({ user, setViewInteracted }) => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        setResponse('');
+        setQuestions([]);
         setError('');
 
         try {
-            const result = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/generate-pulsecheck-response`, { prompt: prompt });
-            console.log(result.data.generatedText);
-            setResponse(result.data.generatedText);
+            const result = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/llama3/generate-pulsecheck-response`, { prompt: prompt });
+            const extractedData = result.data.extractedData;
+            setQuestions(extractedData);
         } catch (err) {
             setError('Failed to generate text');
             console.error(err);
@@ -30,31 +31,35 @@ const PulseCheck = ({ user, setViewInteracted }) => {
 
     return (
         <>
-        <NavBar user={user} setViewInteracted={setViewInteracted}/>
-        <h1>Welcome to PULSECHECK</h1>
-        <div>
-            <h1>PulseCheck Test</h1>
-            <form onSubmit={handleSubmit}>
-                <label>
-                    Prompt:
-                    <input type="text" value={prompt} onChange={handleInputChange} />
-                </label>
-                <button type="submit">Generate</button>
-            </form>
-            {response && (
-                <div>
-                    <h2>Generated Response:</h2>
-                    <p>{response}</p>
-                </div>
-            )}
-            {error && (
-                <div>
-                    <h2>Error:</h2>
-                    <p>{error}</p>
-                </div>
-            )}
-        </div>
-    </>
+            <NavBar user={user} setViewInteracted={setViewInteracted}/>
+            <h1>Welcome to PULSECHECK</h1>
+            <div>
+                <h1>PulseCheck Test</h1>
+                <form onSubmit={handleSubmit}>
+                    <label>
+                        Prompt:
+                        <input type="text" value={prompt} onChange={handleInputChange} />
+                    </label>
+                    <button type="submit">Generate</button>
+                </form>
+                {questions.length > 0 && (
+                    <div>
+                        <h2>Generated Questions:</h2>
+                        {questions.map((q, index) => (
+                            <div key={index} onClick={() => setQuestionKeywords(q.keywords)}>
+                                <h3>{q.question}</h3>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                {error && (
+                    <div>
+                        <h2>Error:</h2>
+                        <p>{error}</p>
+                    </div>
+                )}
+            </div>
+        </>
     );
 };
 

@@ -1,24 +1,126 @@
 const axios = require('axios');
-const { JSDOM } = require('jsdom');
 
-// Function to clean and format text content
-const cleanText = (content) => {
-    const dom = new JSDOM(content);
-    const paragraphs = dom.window.document.querySelectorAll('p');
+/**
+ * Parses HTML content to extract text from <p> tags.
+ * @param {string} html - The raw HTML content.
+ * @returns {string[]} - An array of text extracted from <p> tags.
+ */
+const parseHTML = (html) => {
+    const paragraphs = [];
+    let inTag = false;
+    let currentTag = '';
+    let currentText = '';
 
-    const textArray = Array.from(paragraphs).map(para => {
-        let text = para.textContent;
-        text = text.replace(/\s+/g, ' '); // replace multiple whitespaces with one
-        text = text.replace(/’/g, "'"); // replace special character
-        text = text.replace(/[^\x00-\x7F]+/g, ' '); // remove non-ASCII characters
-        const sentences = text.split('.').filter(sentence => sentence.length > 0);
-        return sentences.join('.\n\n');
-    });
+    for (let i = 0; i < html.length; i++) {
+        const char = html[i];
 
-    return textArray;
+        if (char === '<') {
+            inTag = true;
+            if (currentText.trim()) {
+                // Add text content before the tag
+                if (currentTag === 'p') {
+                    paragraphs.push(currentText);
+                }
+                currentText = '';
+            }
+            currentTag = '';
+        } else if (char === '>') {
+            inTag = false;
+            // Check for closing tag
+            if (currentTag.startsWith('/')) {
+                currentTag = currentTag.slice(1); // Remove '/'
+            }
+        } else if (inTag) {
+            currentTag += char;
+        } else {
+            if (currentTag === 'p') {
+                currentText += char;
+            }
+        }
+    }
+
+    // Add the last segment if it was within <p> tags
+    if (currentText.trim() && currentTag === 'p') {
+        paragraphs.push(currentText);
+    }
+
+    return paragraphs;
 };
 
-// Function to scrape and clean article content
+/**
+ * Cleans and formats the text content by removing extra whitespaces, special characters, and non-ASCII characters.
+ * @param {string} content - The raw HTML content.
+ * @returns {string[]} - An array of cleaned and formatted text segments.
+ */
+const cleanText = (content) => {
+    const paragraphs = parseHTML(content);
+
+    return paragraphs.map(paragraph => {
+        let text = paragraph;
+
+        // Normalize whitespace
+        text = normalizeWhitespace(text);
+
+        // Replace special characters
+        text = replaceSpecialChars(text);
+
+        // Remove non-ASCII characters
+        text = removeNonASCII(text);
+
+        // Split text into sentences and format
+        return text.split('.').filter(Boolean).join('.\n\n');
+    });
+};
+
+/**
+ * Normalize whitespace in the text.
+ * @param {string} text - The text to normalize.
+ * @returns {string} - The normalized text.
+ */
+const normalizeWhitespace = (text) => {
+    let result = '';
+    let inWhitespace = false;
+
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+
+        if (char === ' ' || char === '\n' || char === '\r' || char === '\t') {
+            if (!inWhitespace) {
+                result += ' ';
+                inWhitespace = true;
+            }
+        } else {
+            result += char;
+            inWhitespace = false;
+        }
+    }
+
+    return result.trim();
+};
+
+/**
+ * Replace special characters in the text.
+ * @param {string} text - The text with special characters.
+ * @returns {string} - The text with special characters replaced.
+ */
+const replaceSpecialChars = (text) => {
+    return text.replace(/’/g, "'");
+};
+
+/**
+ * Remove non-ASCII characters from the text.
+ * @param {string} text - The text with potential non-ASCII characters.
+ * @returns {string} - The text with non-ASCII characters removed.
+ */
+const removeNonASCII = (text) => {
+    return text.replace(/[^\x00-\x7F]+/g, ' ');
+};
+
+/**
+ * Scrapes and cleans the article content from a given URL.
+ * @param {string} url - The URL of the article to scrape.
+ * @returns {Promise<string[]>} - A promise that resolves to an array of cleaned text segments.
+ */
 const scrapeArticle = async (url) => {
     try {
         const response = await axios.get(url, {
@@ -29,11 +131,9 @@ const scrapeArticle = async (url) => {
         });
 
         const content = response.data;
-        const formattedContent = cleanText(content); // Clean and format content
-
-        return formattedContent;
+        return cleanText(content); // Clean and format content
     } catch (error) {
-        console.error('Error scraping article:', error);
+        console.error(`Error scraping article from ${url}:`, error.message);
         return [`Error: ${error.message}`];
     }
 };
