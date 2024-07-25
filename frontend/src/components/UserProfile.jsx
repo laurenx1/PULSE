@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import Marquee from './Marquee';
-import { truncateText, handleArticleClick } from '../utils/utils';
+import { handleArticleClick } from '../utils/utils';
+import { truncateText } from '../utils/textUtils';
 
 const UserProfile = ({ user, setViewInteracted, clickedArticle, setClickedArticle, topics}) => {
     const navigate = useNavigate();

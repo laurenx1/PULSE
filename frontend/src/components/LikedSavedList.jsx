@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import NavBar from './NavBar';
-import { truncateText, handleArticleClick } from '../utils/utils';
+import { handleArticleClick } from '../utils/utils';
+import { truncateText } from '../utils/textUtils';
 
 
 const LikedSavedList = ({ user, viewInteracted, setViewInteracted, setClickedArticle }) => {

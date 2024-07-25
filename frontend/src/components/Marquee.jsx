@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { removeStopwordsFromArray } from '../utils/utils';
+import { removeStopwordsFromArray } from '../utils/textUtils';
 import './Marquee.css';
 
 const Marquee = ({ user }) => {

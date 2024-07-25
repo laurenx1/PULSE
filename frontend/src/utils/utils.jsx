@@ -1,19 +1,6 @@
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-// Function to truncate text to wordLimit number of words. 
-export const truncateText = (text, wordLimit) => {
-    if (!text) return 'No text available';
-    const words = text.split(' ');
-    if (words.length <= wordLimit) return text;
-
-    // 50 means that the text is most likely a description to be truncated, should include the ... at the end for styling
-    if (wordLimit === 30) {
-        return `${words.slice(0, wordLimit).join(' ')}...`;
-    }
-    return words.slice(0, wordLimit).join(' ');
-};
-
 
 // Function to call backend to retrieve AI-generated content scores for the opened article
 // @TODO: Add loading states to this 
@@ -55,7 +42,7 @@ export const fetchArticleContent = async (setContent, article, setError, setLoad
 // Function to open the article that the user clicks on
 export const handleArticleClick = async (user, article, setClickedArticle, navigate) => {
     try {
-        await axios.patch(import.meta.env.VITE_BACKEND_URL + `/api/users/${user.id}`, { lastRead: article });
+        await axios.patch(import.meta.env.VITE_BACKEND_URL + `/update/users/${user.id}`, { lastRead: article });
     } catch (error) {
         console.error('Error updating last read article:', error);
     }
@@ -64,30 +51,7 @@ export const handleArticleClick = async (user, article, setClickedArticle, navig
 };
 
 
-// Function to remove stopwords from array, also tokenizes string array into single-word elemetns
-export const removeStopwordsFromArray = (wordArray) => {
-    const stopwords = [
-        "a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "has", "he", "in", "is", "it", "its", "of", "on", "that", "the", "to", "was", "were", "will", "with", "change"
-      ];
-    
-    const removeStopwordsFromPhrase = (text) => {
-        return text
-            .split(' ')
-            .filter(word => !stopwords.includes(word.toLowerCase()))
-            .join(' ');
-    };
 
-    const slightlyProcessedWordArray = wordArray.map(phrase => removeStopwordsFromPhrase(phrase));
-
-
-    const tokenizeArray = (stringArray) => {
-        return stringArray.flatMap(sentence => sentence.split(' '));
-      };
-
-    const processedWordArray = tokenizeArray(slightlyProcessedWordArray);
-
-    return processedWordArray; 
-}
 
 
 
