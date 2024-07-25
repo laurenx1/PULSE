@@ -8,7 +8,7 @@ export const truncateText = (text, wordLimit) => {
     if (words.length <= wordLimit) return text;
 
     // 50 means that the text is most likely a description to be truncated, should include the ... at the end for styling
-    if (wordLimit === 50) {
+    if (wordLimit === 30) {
         return `${words.slice(0, wordLimit).join(' ')}...`;
     }
     return words.slice(0, wordLimit).join(' ');

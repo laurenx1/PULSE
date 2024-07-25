@@ -57,12 +57,12 @@ const LikedSavedList = ({ user, viewInteracted, setViewInteracted, setClickedArt
                 <div
                     key={index}
                     className="bg-gray-800 p-4 rounded-lg text-white cursor-pointer hover:bg-gray-800 hover:scale-105 transition-transform"
-                    onClick={() => handleArticleClick(user, user.lastRead, setClickedArticle, navigate)}
+                    onClick={() => handleArticleClick(user, article, setClickedArticle, navigate)}
                 >
                     <h3 className="text-xl font-bold">{article.title}</h3>
                     <p className="text-green-500">{article.realScore.toFixed(4) * 100}% Real Content Score</p>
                     <p>{article.author.join(', ')}</p>
-                    <p>{truncateText(article.description, 50)}</p>
+                    <p>{truncateText(article.description, 30)}</p>
                 </div>
             ))}
         </div>

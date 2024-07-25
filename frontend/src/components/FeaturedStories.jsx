@@ -67,7 +67,7 @@ const FeaturedStories = ({ user, setClickedArticle, setViewInteracted }) => {
             <div className="space-y-6">
                 {firstArticle && (
                     <div
-                        className="bg-gradient-to-r from-[#2E008E] via-[#98648B] to-[#FCC188] p-6 rounded-lg cursor-pointer hover:opacity-90 hover:scale-105 transition-transform"
+                        className="bg-gradient-to-r from-[#2E008E] via-[#98648B] to-[#FCC188] p-6 rounded-lg cursor-pointer hover:opacity-60 "
                         onClick={() => handleArticleClick(user, firstArticle, setClickedArticle, navigate)}
                     >
                         <div className="flex justify-between">
@@ -94,7 +94,7 @@ const FeaturedStories = ({ user, setClickedArticle, setViewInteracted }) => {
                             <h3 className="text-xl font-bold">{article.title}</h3>
                             <p className="text-green-500">{article.realScore.toFixed(4) * 100}% Real Content Score</p>
                             <p>{article.author.join(', ')}</p>
-                            <p>{truncateText(article.description, 50)}</p>
+                            <p>{truncateText(article.description, 30)}</p>
                         </div>
                     ))}
                 </div>

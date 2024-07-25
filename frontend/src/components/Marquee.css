@@ -13,7 +13,7 @@
 
 .marquee-content {
   font-family: CompactaStd;
-  font-size: 140px;
+  font-size: 120px;
   display: inline-block;
   padding-left: 100%;
   animation: marquee 250s linear infinite; /* Ensure infinite looping */

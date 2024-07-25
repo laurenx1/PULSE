@@ -2,19 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import Marquee from './Marquee';
-import { removeStopwordsFromArray, truncateText } from '../utils/utils';
+import { removeStopwordsFromArray, truncateText, handleArticleClick } from '../utils/utils';
 
-const UserProfile = ({ user, setViewInteracted}) => {
+const UserProfile = ({ user, setViewInteracted, clickedArticle, setClickedArticle, topics}) => {
     const { username, preferredTopics } = user;
-    const [topics, setTopics] = useState(preferredTopics);
-    const lastRead = user.lastRead; 
+    // const [topics, setTopics] = useState(preferredTopics);
+    const selectedTopics = topics.length !== 0 ? topics : user.preferredTopics;
+
+
+    console.log("THE TOPICS YOU CHOSE", selectedTopics);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        // change this to be a fetch call to backend to get topics again
-        setTopics(user.preferredTopics);
+    const lastRead = clickedArticle || user.lastRead;
 
-    }, [user.preferredTopics]); // Update useEffect to depend on preferredTopics
+    // useEffect(() => {
+    //     // change this to be a fetch call to backend to get topics again
+    //     setTopics(user.preferredTopics);
+
+    // }, [user.preferredTopics]); // Update useEffect to depend on preferredTopics
 
     const handleSelectTopics = () => {
         navigate(`/${user.id}/topics`);
@@ -22,8 +27,10 @@ const UserProfile = ({ user, setViewInteracted}) => {
 
     const handleLastRead = () => {
         console.log('going to last read article!');
+        handleArticleClick(user, lastRead, setClickedArticle, navigate);
     }
 
+    console.log(lastRead);
 
 
     const processedTopics = removeStopwordsFromArray(user.preferredTopics)
@@ -47,7 +54,7 @@ const UserProfile = ({ user, setViewInteracted}) => {
                 <div className="bg-gradient-to-r from-[#2E008E] via-[#7042D2] to-[#FCC188] rounded-lg p-4 mb-8">
                     <h3 className="text-lg font-bold mb-4">YOUR PULSE POINTS</h3>
                     <div className="grid grid-cols-2 gap-4">
-                        {topics.map(topic => (
+                        {selectedTopics.map(topic => (
                             <button key={topic} className="bg-black text-white p-4 rounded-lg text-center hover:opacity-50">{topic}</button>
                         ))}
                     </div>
