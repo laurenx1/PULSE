@@ -261,7 +261,7 @@ const fetchAndCacheArticlesByTopics = async (topics, limit = 3) => {
       console.error(`Error fetching articles for topic ${topic}:`, error);
     }
   }
-  updateArticleKeywords();
+  updateArticleKeywords(); // ensure all article's keywords fields are non-empty
   console.log('Articles fetched and cached successfully.');
 };
 
