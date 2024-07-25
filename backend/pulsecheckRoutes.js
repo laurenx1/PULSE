@@ -23,16 +23,18 @@ router.post('/generate-pulsecheck-response', async (req, res) => {
                 
             ],
             model: 'llama3-8b-8192',
-             // Controls randomness: lowering results in less random completions.
-            // As the temperature approaches zero, the model will become deterministic
-            // and repetitive.
-            // good to have low temperature here to make more predicatable for parsing.
+            /**  Controls randomness: lowering results in less random completions.
+             * As the temperature approaches zero, the model will become deterministic
+             * and repetitive.
+             * good to have low temperature here to make more predicatable for parsing. 
+            */
             temperature: 0.2,
 
-            // The maximum number of tokens to generate. Requests can use up to
-            // 2048 tokens shared between prompt and completion.
-
-            // low tokens here to create more predictable response fo parsing (less words, forced to condense to questions and keywords)
+            /** The maximum number of tokens to generate. Requests can use up to
+             * 2048 tokens shared between prompt and completion.
+             * < 200 tokens to create more predictable response fo parsing 
+             * (less words, forced to condense to questions and keywords)
+            */
             max_tokens: 200,
         }); 
   

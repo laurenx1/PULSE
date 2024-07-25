@@ -19,7 +19,7 @@ const Story = ({ user, clickedArticle, setViewInteracted }) => {
     const handleLike = async () => {
         if (liked) return; // Prevent multiple likes
         try {
-            await axios.post(import.meta.env.VITE_BACKEND_URL + `/api/articles/${clickedArticle.id}/like`, { userId: user.id });
+            await axios.post(import.meta.env.VITE_BACKEND_URL + `/update/articles/${clickedArticle.id}/like`, { userId: user.id });
             setLiked(true);
         } catch (error) {
             console.error('Error liking article:', error);
@@ -29,7 +29,7 @@ const Story = ({ user, clickedArticle, setViewInteracted }) => {
     const handleSave = async () => {
         if (saved) return; // Prevent multiple saves
         try {
-            await axios.post(import.meta.env.VITE_BACKEND_URL + `/api/articles/${clickedArticle.id}/save`, { userId: user.id });
+            await axios.post(import.meta.env.VITE_BACKEND_URL + `/update/articles/${clickedArticle.id}/save`, { userId: user.id });
             setSaved(true);
         } catch (error) {
             console.error('Error saving article:', error);
