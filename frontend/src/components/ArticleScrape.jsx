@@ -25,7 +25,7 @@ const ArticleScrape = ({ article }) => {
                     <span className="text-lg">{article.realScore === 0 ? "NO SCORE CALCULATED" : (article.realScore * 100).toFixed(4) + "% Real"}</span>
                 </div>
                 <div className="flex text-red-500">
-                    <span className="text-lg">{article.realScore === 0 ? "NO SCORE CALCULATED" : (article.realScore * 100).toFixed(4) + "% Fake"}</span>
+                    <span className="text-lg">{article.fakeScore === 0 ? "NO SCORE CALCULATED" : (article.fakeScore * 100).toFixed(4) + "% Fake"}</span>
                 </div>
             </div>
             <h1 className="text-4xl font-bold my-4">{article.title}</h1>

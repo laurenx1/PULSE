@@ -49,6 +49,6 @@ try {
 }; 
 
 
-module.exports = { updateArticleKeywords };
+module.exports = { updateArticleKeywords, extractKeywords };
 
   
