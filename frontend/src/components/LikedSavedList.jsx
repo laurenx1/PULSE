@@ -53,17 +53,17 @@ const LikedSavedList = ({ user, viewInteracted, setViewInteracted, setClickedArt
         <>
         <div>
             <NavBar user={user} setViewInteracted={setViewInteracted}/>
-            <h1 className="text-3xl font-bold text-center mb-20">Here are your {contentType} articles!</h1>
+            <h1 className="text-3xl font-bold text-center text-white mb-20">Your {contentType} articles</h1>
         </div>
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-4 gap-6 ml-6 mr-6">
             {articles.map((article, index) => (
                 <div
                     key={index}
-                    className="bg-gray-800 p-4 rounded-lg text-white cursor-pointer hover:bg-gray-800 hover:scale-105 transition-transform"
+                    className="bg-neutral p-4 rounded-lg text-white cursor-pointer hover:bg-gray-800"
                     onClick={() => handleArticleClick(user, article, setClickedArticle, navigate)}
                 >
-                    <h3 className="text-xl font-bold">{article.title}</h3>
-                    <p className="text-green-500">{article.realScore.toFixed(4) * 100}% Real Content Score</p>
+                    <h3 className="text-xl font-bold">{truncateText(article.title, 15)}</h3>
+                    <p className="text-success">{article.realScore.toFixed(4) * 100}% Real Content Score</p>
                     <p>{article.author.join(', ')}</p>
                     <p>{truncateText(article.description, 30)}</p>
                 </div>

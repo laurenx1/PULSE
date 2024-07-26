@@ -42,18 +42,19 @@ const Story = ({ user, clickedArticle, setViewInteracted }) => {
                 <NavBar user={user} setViewInteracted={setViewInteracted}/>
                 <div className="absolute top-16 right-0 flex items-center space-x-2 mr-4 mb-4">
                     <button 
-                        className={`btn ${liked ? 'btn-primary' : 'btn-outline btn-primary'}`} 
+                        className={`btn text-2xl ${liked ? 'text-pink-500' : 'text-white'}`} 
                         onClick={handleLike}
                     >
-                        ♥
+                        {liked ? '♥' : '♡'}
                     </button>
                     <button 
-                        className={`btn ${saved ? 'btn-secondary' : 'btn-outline btn-secondary'}`} 
+                        className={`btn text-2xl ${saved ? 'text-purple-500' : 'text-white'}`} 
                         onClick={handleSave}
                     >
-                        ★
+                        {saved ? '★' : '☆'}
                     </button>
                 </div>
+
             </div>
 
             <ArticleScrape article={clickedArticle} />

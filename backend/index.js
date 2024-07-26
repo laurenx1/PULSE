@@ -60,7 +60,7 @@ const fetchAndStoreArticles = async () => {
 
     for (const article of articles) {
       const formattedContent = await scrapeArticle(article.link); // Scrape the content
-
+      const aiScores = await detectAIContent(formattedContent)
       await prisma.article.upsert({
         where: { title: article.title },
         update: {},
@@ -72,6 +72,8 @@ const fetchAndStoreArticles = async () => {
           keywords: article.keywords || [], // Initialize with an empty array if null
           publishedAt: new Date(article.pubDate || Date.now()), // Provide current date if pubDate is missing
           content: formattedContent, // Save the formatted content as an array of paragraphs
+          realScore: aiScores.realScore,
+          fakeScore: aiScores.fakeScore
         },
       });
     }
@@ -149,6 +151,40 @@ app.post('/api/detect-ai-content-hf', async (req, res) => {
 });
 
 
+// Function for AI-generated content detection scoring
+const detectAIContent = async (content) => {
+  const hfApiKey = process.env.HF_API_KEY;
+  if (!content) {
+      throw new Error('Content is required.');
+  }
+
+  try {
+      const response = await axios.post(
+          "https://api-inference.huggingface.co/models/openai-community/roberta-base-openai-detector",
+          { inputs: content },
+          {
+              headers: {
+                  'Authorization': `Bearer ${hfApiKey}`,
+                  'Content-Type': 'application/json',
+              },
+          }
+      );
+
+      const realScore = response.data[0][0].score;
+      const fakeScore = response.data[0][1].score;
+
+      return { realScore, fakeScore };
+  } catch (error) {
+      console.error('Error detecting AI content:', error);
+      throw new Error('Error detecting AI content');
+  }
+};
+
+
+
+
+
+
 // view liked or saved articles 
 app.get('/api/interactedArticles', async (req, res) => {
   const { type, userId } = req.query; // type can be 'liked' or 'saved'
@@ -220,6 +256,9 @@ app.get(`/relevant-articles`, async (req, res) => {
     res.status(500).json({ error: 'Error fetching headlines' });
   }
 });
+
+
+
 
 
 // fetch and cache articles based on the topics in this frequency dictionary
@@ -331,6 +370,76 @@ app.get('/api/recommendations/:userId', async (req, res) => {
 
 
 
+
+const fetchPulseCheckArticles = async (keywords) => {
+  // Convert keywords to lowercase for case-insensitive matching
+  const lowercaseKeywords = keywords.map(keyword => keyword.toLowerCase());
+
+  let articles = [];
+
+  // Query the database for articles matching all keywords first, then fewer keywords
+  for (let i = keywords.length; i > 0; i--) {
+      const combinations = getCombinations(lowercaseKeywords, i);
+      for (const combination of combinations) {
+          const keywordQuery = combination.map(keyword => ({
+              keywords: {
+                  has: keyword
+              }
+          }));
+
+          const matchingArticles = await prisma.article.findMany({
+              where: {
+                  AND: keywordQuery
+              },
+              take: 16 - articles.length
+          });
+
+          articles.push(...matchingArticles);
+
+          // If we have reached 16 articles, return
+          if (articles.length >= 16) {
+              return articles.slice(0, 16);
+          }
+      }
+  }
+
+  return articles.slice(0, 16);
+};
+
+// Helper function to get combinations of array elements
+const getCombinations = (array, size) => {
+  if (size === 1) return array.map(d => [d]);
+  let result = [];
+  array.forEach((d, i) => {
+      const smallerCombos = getCombinations(array.slice(i + 1), size - 1);
+      smallerCombos.forEach(combo => {
+          result.push([d, ...combo]);
+      });
+  });
+  return result;
+};
+
+// Endpoint to get pulse check articles
+app.get('/pulsecheck/articles', async (req, res) => {
+  // Get the pulseCheckKeywords query parameter, which is expected to be an array
+  const pulseCheckKeywords = req.query.pulseCheckKeywords;
+
+  // Ensure pulseCheckKeywords is an array
+  const keywords = Array.isArray(pulseCheckKeywords) ? pulseCheckKeywords : [];
+
+  if (keywords.length === 0) {
+      return res.status(400).json({ error: 'Keywords are required' });
+  }
+
+  try {
+      // Fetch articles based on the keywords array
+      const articles = await fetchPulseCheckArticles(keywords);
+      res.json(articles);
+  } catch (error) {
+      console.error('Error fetching pulsecheck articles:', error);
+      res.status(500).json({ error: 'Error fetching pulsecheck articles' });
+  }
+});
 
 
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { fetchArticleContent, handleDetection } from '../utils/utils';
+import { truncateText } from '../utils/textUtils';
 
 const ArticleScrape = ({ article }) => {
     const [content, setContent] = useState([]);

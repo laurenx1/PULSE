@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
+import { truncateText } from './textUtils';
 
 // Function to call backend to retrieve AI-generated content scores for the opened article
 // @TODO: Add loading states to this 

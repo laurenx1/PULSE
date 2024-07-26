@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const Groq = require("groq-sdk"); // Import groq if it's a separate module or use your actual import method
-
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 // Define the /generate-pulsecheck-response route
@@ -68,6 +67,12 @@ router.post('/generate-pulsecheck-response', async (req, res) => {
         res.status(500).json({ error: 'error' });
     }
 });
+
+
+
+
+
+
 
 module.exports = router;
 

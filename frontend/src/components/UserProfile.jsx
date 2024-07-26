@@ -24,7 +24,6 @@ const UserProfile = ({ user, setViewInteracted, clickedArticle, setClickedArticl
     };
 
     const handleLastRead = () => {
-        console.log('going to last read article!');
         handleArticleClick(user, lastRead, setClickedArticle, navigate);
     }
 

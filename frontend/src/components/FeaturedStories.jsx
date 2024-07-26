@@ -54,32 +54,30 @@ const FeaturedStories = ({ user, setClickedArticle, setViewInteracted }) => {
                 <p className="text-center">Your breaking news.</p>
             </header>
             {user.lastRead && (
-                <div className="fixed bottom-0 left-0 right-0 p-4 bg-pink-500 text-white text-center z-50">
-                    <span>You were reading "{user.lastRead.title}". </span>
-                    <button
-                        onClick={() => handleArticleClick(user, user.lastRead, setClickedArticle, navigate)}
-                        className="underline hover:text-gray-300 transition"
-                    >
-                        Continue Reading?
-                    </button>
-                </div>
+                <div className="fixed bottom-4 right-4 p-2 bg-gradient-to-r from-[#1E90FF] to-[#00FA9A] text-white text-center z-50 rounded-full shadow-lg flex items-center space-x-2">
+                <span>You were reading "{user.lastRead.title}". </span>
+                <button
+                    onClick={() => handleArticleClick(user, user.lastRead, setClickedArticle, navigate)}
+                    className="underline hover:text-gray-300 transition whitespace-nowrap"
+                >
+                    Continue Reading?
+                </button>
+            </div>
             )}
 
             <div className="space-y-6">
                 {firstArticle && (
                     <div
-                        className="bg-gradient-to-r from-[#2E008E] via-[#98648B] to-[#FCC188] p-6 rounded-lg cursor-pointer hover:opacity-60 "
+                        className="bg-gradient-to-r from-pink-500 to-purple-500 p-6 rounded-lg cursor-pointer hover:opacity-60 "
                         onClick={() => handleArticleClick(user, firstArticle, setClickedArticle, navigate)}
                     >
                         <div className="flex justify-between">
                             <div>
-                                <p className="text-lg font-bold">KEYWORDS: {firstArticle.keywords.join(', ')}</p>
                                 <h2 className="text-3xl font-bold">{firstArticle.title}</h2>
                                 <p>{truncateText(firstArticle.description, 50)}</p>
                             </div>
                             <div className="text-right">
-                                <p className="text-green-500">{firstArticle.realScore.toFixed(4) * 100}% Real Content Score</p>
-                                <p className="text-red-500">{firstArticle.fakeScore.toFixed(4) * 100}% AI Generated Content Score</p>
+                                <p className="text-success">{firstArticle.realScore.toFixed(4) * 100}% Real Content Score</p>
                             </div>
                         </div>
                     </div>
@@ -89,12 +87,12 @@ const FeaturedStories = ({ user, setClickedArticle, setViewInteracted }) => {
                     {allArticles.map((article, index) => (
                         <div
                             key={index}
-                            className="bg-black border border-white p-4 rounded-lg text-white cursor-pointer hover:bg-gray-800 hover:scale-105 transition-transform"
+                            className="bg-neutral p-4 rounded-lg text-white cursor-pointer hover:bg-gray-800 hover:scale-105 transition-transform"
                             onClick={() => handleArticleClick(user, article, setClickedArticle, navigate)}
                         >
                             <h3 className="text-xl font-bold">{article.title}</h3>
-                            <p className="text-green-500">{article.realScore.toFixed(4) * 100}% Real Content Score</p>
-                            <p>{article.author.join(', ')}</p>
+                            <p className="text-success">{article.realScore.toFixed(4) * 100}% Real Content Score</p>
+                            <p className="text-pink-500">{article.author.join(', ')}</p>
                             <p>{truncateText(article.description, 30)}</p>
                         </div>
                     ))}

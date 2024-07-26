@@ -9,14 +9,17 @@ import Story from './components/Story';
 import PulseCheck from './components/PulseCheck';
 import TopicSelector from './components/TopicSelector';
 import LikedSavedList from './components/LikedSavedList';
+import PulseCheckArticles from './components/PulseCheckArticles';
 
 function App() {
   const [user, setUser] = useState(null);
   const [clickedArticle, setClickedArticle] = useState(''); // clickedArticle changes upon opening article, so can be used to get lastRead as well
   const [viewInteracted, setViewInteracted] = useState('');
   const [topics, setTopics] = useState([]);
+  const [question, setQuestion] = useState('');
+  const [questionKeywords, setQuestionKeywords] = useState([]);
 
-
+// @TODO: make all margins consisent w wrap
   return (
     <>
     <div data-theme='mytheme'>
@@ -34,11 +37,13 @@ function App() {
          {user !== null && <Route path={`/${user.id}/featured`} element={<FeaturedStories user={user} setClickedArticle={setClickedArticle} setViewInteracted={setViewInteracted} />} />}
          {user !== null && <Route path={`/${user.id}/topics`} element={<TopicSelector user={user} setTopics={setTopics}/>} />}
          {clickedArticle !== '' && <Route path={`/openArticle`} element={<Story user={user} clickedArticle={clickedArticle} setViewInteracted={setViewInteracted}/>}/>}
-         {user !== null && <Route path={`/${user.id}/pulsecheck`} element={<PulseCheck user={user} setViewInteracted={setViewInteracted}/>} />}
+         {user !== null && <Route path={`/${user.id}/pulsecheck`} element={<PulseCheck user={user} setViewInteracted={setViewInteracted} setQuestion={setQuestion} setQuestionKeywords={setQuestionKeywords}/>} />}
          {user !== null && (viewInteracted !== '') && <Route path={`/${user.id}/seeYourContent`} element={<LikedSavedList user={user} viewInteracted={viewInteracted} setViewInteracted={setViewInteracted} setClickedArticle={setClickedArticle}/>} />}
+         {user !== null && <Route path={`/${user.id}/pulsecheck-articles`} element={<PulseCheckArticles user={user} setClickedArticle={setClickedArticle} setViewInteracted={setViewInteracted} question={question} questionKeywords={questionKeywords}/>} />}
       </Routes>
     </Router>
     </div>
+
     </>
   )
 }
