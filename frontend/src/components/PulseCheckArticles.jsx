@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { handleArticleClick } from '../utils/utils';
 import { truncateText } from '../utils/textUtils';
+import ArticleBoard from './ArticleBoard';
+import NavBar from './NavBar';
 
 import axios from 'axios';
 
@@ -31,21 +33,9 @@ const PulseCheckArticles = ({ user, setClickedArticle, setViewInteracted, questi
 
     return (
         <>
+        <NavBar user={user} setViewInteracted={setViewInteracted}/>
         <h1>welcome to your articles on: {question}</h1>
-        <div className="grid grid-cols-4 gap-4">
-                    {pulseCheckArticles.map((article, index) => (
-                        <div
-                            key={index}
-                            className="bg-neutral p-4 rounded-lg text-white cursor-pointer hover:bg-gray-800 hover:scale-105 transition-transform"
-                            onClick={() => handleArticleClick(user, article, setClickedArticle, navigate)}
-                        >
-                            <h3 className="text-xl font-bold">{article.title}</h3>
-                            <p className="text-success">{article.realScore === 0 ? "NO SCORE CALCULATED" : (article.realScore * 100).toFixed(4) + "% Real Content Score"}</p>
-                            <p className="text-pink-500">{article.author.join(', ')}</p>
-                            <p>{truncateText(article.description, 30)}</p>
-                        </div>
-                    ))}
-                </div>
+        {pulseCheckArticles.length > 0 && <ArticleBoard user={user} setClickedArticle={setClickedArticle} setViewInteracted={setViewInteracted} articleList={pulseCheckArticles}/>}
         </>
     );
 };
