@@ -146,6 +146,7 @@ const truncateText = (contentString) => {
   return contentString;
 }
 
+
 // Function for AI-generated content detection scoring
 const detectAIContent = async (content) => {
   const contentString = content.join(' ');
