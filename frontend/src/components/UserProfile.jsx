@@ -25,7 +25,11 @@ const UserProfile = ({ user, setViewInteracted, clickedArticle, setClickedArticl
 
     const handleLastRead = () => {
         handleArticleClick(user, lastRead, setClickedArticle, navigate);
-    }
+    };
+
+    const handleLastAsked = () => {
+        console.log('going to your last asked question!')
+    };
 
     return (
         <div className="container mx-auto px-4 py-8 bg-black min-h-screen">
@@ -52,7 +56,7 @@ const UserProfile = ({ user, setViewInteracted, clickedArticle, setClickedArticl
                 </div>
                 <div className="flex space-x-4">
                     <button className="btn btn-primary bg-[#EB73CB] rounded-lg px-4 py-2" onClick={handleSelectTopics}>Edit your interests</button>
-                    <button className="btn btn-primary bg-[#EB73CB] rounded-lg px-4 py-2">See updates on your most recently asked question</button>
+                    <button className="btn btn-primary bg-[#EB73CB] rounded-lg px-4 py-2" onClick={handleLastAsked}>See updates on your most recently asked question</button>
                 </div>
             </div>
             <Marquee user={user}/>

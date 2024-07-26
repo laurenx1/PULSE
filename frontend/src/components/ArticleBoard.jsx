@@ -8,7 +8,7 @@ const ArticleBoard = ({user, setClickedArticle, setViewInteracted, articleList})
 
     return (
         <>
-        <div className="grid grid-cols-4 gap-6 ml-6 mr-6">
+        <div className="grid grid-cols-4 gap-6 ml-6 mr-6 mb-4">
             {articleList.map((article, index) => (
                 <div
                     key={index}

@@ -14,11 +14,11 @@ bodyParser = require('body-parser');
 
 const { scrapeArticle } = require('./scraper');
 const { getAllPreferredTopics, generateFrequencyDictionary, findSimilarUsers, recommendArticles } = require('./recommendUtils');
-const { updateArticleKeywords} = require('./keywordExtract')
+const { updateArticleKeywords} = require('./keywordExtract');
 const authRoutes = require('./authRoutes');
-const pulsecheckRoutes = require('./pulsecheckRoutes')
-const userActionRoutes = require('./userActionRoutes')
-
+const pulsecheckRoutes = require('./pulsecheckRoutes');
+const userActionRoutes = require('./userActionRoutes');
+const articleEnpointRoutes = require('./articleEndpointRoutes');
 
 const prisma = new PrismaClient();
 const app = express();
@@ -37,6 +37,7 @@ app.use(cors());
 app.use('/auth', authRoutes);
 app.use('/llama3', pulsecheckRoutes);
 app.use('/update', userActionRoutes);
+app.use('/api', articleEnpointRoutes);
 
 
 
@@ -83,21 +84,6 @@ const fetchAndStoreArticles = async () => {
   }
 };
 
-
-app.get('/api/articles', async (req, res) => {
-  try {
-    const articles = await prisma.article.findMany({
-      orderBy: {
-        publishedAt: 'desc'
-      },
-      take: 10
-    });
-    res.json(articles);
-  } catch (error) {
-    console.error('Error fetching articles:', error);
-    res.status(500).json({ error: 'Error fetching articles' });
-  }
-});
 
 
 // AI-content detection scoring
@@ -197,33 +183,6 @@ const detectAIContent = async (content) => {
 
 
 
-
-// view liked or saved articles 
-app.get('/api/interactedArticles', async (req, res) => {
-  const { type, userId } = req.query; // type can be 'liked' or 'saved'
-
-  try {
-      const user = await prisma.user.findUnique({
-          where: { id: parseInt(userId) },
-          include: { interactions: true },
-      });
-
-      if (!user) {
-          return res.status(404).json({ error: 'User not found' });
-      }
-
-      const articleIds = user[type] || [];
-      const articles = await prisma.article.findMany({
-          where: { id: { in: articleIds } },
-          orderBy: { publishedAt: 'desc' },
-      });
-
-      res.json(articles);
-  } catch (error) {
-      console.error(`Error fetching ${type} articles:`, error);
-      res.status(500).json({ error: `Error fetching ${type} articles` });
-  }
-});
 
 
 // Function to fetch title of most recent articles for each topic 
@@ -358,109 +317,9 @@ const scheduleArticleFetching = () => {
 scheduleArticleFetching();
 
 
-// create API endpoint to get recommended articles. 
-// @TODO: build bigger user base for dev purposes. 
-app.get('/api/recommendations/:userId', async (req, res) => {
-  const targetUserId = parseInt(req.params.userId);
-  const similarityThreshold = 0; // adjust later
-  try {
-    const targetUser = await prisma.user.findUnique({
-      where: { id: targetUserId },
-      include: { interactions: true }
-    }); 
-
-    const allUsers = await prisma.user.findMany({ include: { interactions: true } });
-    const allArticles = await prisma.article.findMany({ 
-      orderBy: {
-        publishedAt: 'desc'
-      },
-      // take: 200
-     });
-
-    const similarUsers = findSimilarUsers(targetUser, allUsers, similarityThreshold);
-    const recommendedArticles = recommendArticles(targetUser, similarUsers, allArticles);
-
-    res.json(recommendedArticles);
-  } catch (error) {
-    console.error('Error generating recommendations:', error);
-    res.status(500).json({ error: 'Error generating recommendations' });
-  }
-
-});
 
 
 
-
-
-const fetchPulseCheckArticles = async (keywords) => {
-  // Convert keywords to lowercase for case-insensitive matching
-  const lowercaseKeywords = keywords.map(keyword => keyword.toLowerCase());
-
-  let articles = [];
-
-  // Query the database for articles matching all keywords first, then fewer keywords
-  for (let i = keywords.length; i > 0; i--) {
-      const combinations = getCombinations(lowercaseKeywords, i);
-      for (const combination of combinations) {
-          const keywordQuery = combination.map(keyword => ({
-              keywords: {
-                  has: keyword
-              }
-          }));
-
-          const matchingArticles = await prisma.article.findMany({
-              where: {
-                  AND: keywordQuery
-              },
-              take: 16 - articles.length
-          });
-
-          articles.push(...matchingArticles);
-
-          // If we have reached 16 articles, return
-          if (articles.length >= 16) {
-              return articles.slice(0, 16);
-          }
-      }
-  }
-
-  return articles.slice(0, 16);
-};
-
-// Helper function to get combinations of array elements
-const getCombinations = (array, size) => {
-  if (size === 1) return array.map(d => [d]);
-  let result = [];
-  array.forEach((d, i) => {
-      const smallerCombos = getCombinations(array.slice(i + 1), size - 1);
-      smallerCombos.forEach(combo => {
-          result.push([d, ...combo]);
-      });
-  });
-  return result;
-};
-
-// Endpoint to get pulse check articles
-app.get('/pulsecheck/articles', async (req, res) => {
-  // Get the pulseCheckKeywords query parameter, which is expected to be an array
-  const pulseCheckKeywords = req.query.pulseCheckKeywords;
-
-  // Ensure pulseCheckKeywords is an array
-  const keywords = Array.isArray(pulseCheckKeywords) ? pulseCheckKeywords : [];
-
-  if (keywords.length === 0) {
-      return res.status(400).json({ error: 'Keywords are required' });
-  }
-
-  try {
-      // Fetch articles based on the keywords array
-      const articles = await fetchPulseCheckArticles(keywords);
-      res.json(articles);
-  } catch (error) {
-      console.error('Error fetching pulsecheck articles:', error);
-      res.status(500).json({ error: 'Error fetching pulsecheck articles' });
-  }
-});
 
 
 
