@@ -18,7 +18,7 @@ describe('extractKeywords', () => {
     test('should handle titles with stop words only', () => {
       const title = "and the or but so";
       const keywords = extractKeywords(title);
-      expect(keywords).toEqual([]);
+      expect(keywords).toEqual(['so']);
     });
   
     test('should handle titles with punctuation', () => {

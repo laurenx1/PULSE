@@ -41,7 +41,7 @@ app.use('/update', userActionRoutes);
 
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  // console.log(`Server running on http://localhost:${PORT}`);
 });
 
 
@@ -198,8 +198,6 @@ const detectAIContent = async (content) => {
 
 
 
-
-
 // view liked or saved articles 
 app.get('/api/interactedArticles', async (req, res) => {
   const { type, userId } = req.query; // type can be 'liked' or 'saved'
@@ -320,6 +318,11 @@ const fetchAndCacheArticlesByTopics = async (topics, limit = 3) => {
   }
   updateArticleKeywords(); // ensure all article's keywords fields are non-empty
   console.log('Articles fetched and cached successfully.');
+};
+
+module.exports = {
+  fetchAndCacheArticlesByTopics,
+  detectAIContent
 };
 
 
