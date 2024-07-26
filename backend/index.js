@@ -151,8 +151,23 @@ app.post('/api/detect-ai-content-hf', async (req, res) => {
 });
 
 
+
+const truncateText = (contentString) => {
+  const words = contentString.split(/\s+/);
+  if (words.length > 300) {
+    return words.slice(0, 300).join(" ");
+  }
+  return contentString;
+}
+
 // Function for AI-generated content detection scoring
 const detectAIContent = async (content) => {
+  const contentString = content.join(' ');
+  const removeNewLineContent = contentString.replace(/[\r\n]+/g, " ");
+
+  const truncatedContent = truncateText(removeNewLineContent);
+
+  console.log(truncatedContent);
   const hfApiKey = process.env.HF_API_KEY;
   if (!content) {
       throw new Error('Content is required.');
@@ -161,7 +176,7 @@ const detectAIContent = async (content) => {
   try {
       const response = await axios.post(
           "https://api-inference.huggingface.co/models/openai-community/roberta-base-openai-detector",
-          { inputs: content },
+          { inputs: truncatedContent },
           {
               headers: {
                   'Authorization': `Bearer ${hfApiKey}`,
@@ -281,6 +296,7 @@ const fetchAndCacheArticlesByTopics = async (topics, limit = 3) => {
 
       for (const article of topicArticles) {
         const formattedContent = await scrapeArticle(article.link); // Scrape the content
+        const aiScores = await detectAIContent(formattedContent);
 
         await prisma.article.upsert({
           where: { title: article.title },
@@ -293,6 +309,8 @@ const fetchAndCacheArticlesByTopics = async (topics, limit = 3) => {
             keywords: article.keywords || [],
             publishedAt: new Date(article.pubDate || Date.now()),
             content: formattedContent, // Save the formatted content as an array of paragraphs
+            realScore: aiScores.realScore,
+            fakeScore: aiScores.fakeScore,
           },
         });
       }

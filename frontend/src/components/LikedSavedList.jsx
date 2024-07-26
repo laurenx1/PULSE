@@ -63,7 +63,7 @@ const LikedSavedList = ({ user, viewInteracted, setViewInteracted, setClickedArt
                     onClick={() => handleArticleClick(user, article, setClickedArticle, navigate)}
                 >
                     <h3 className="text-xl font-bold">{truncateText(article.title, 15)}</h3>
-                    <p className="text-success">{article.realScore.toFixed(4) * 100}% Real Content Score</p>
+                    <p className="text-success">{article.realScore === 0 ? "NO SCORE CALCULATED" : (article.realScore * 100).toFixed(4) + "% Real Content Score"}</p>
                     <p>{article.author.join(', ')}</p>
                     <p>{truncateText(article.description, 30)}</p>
                 </div>
