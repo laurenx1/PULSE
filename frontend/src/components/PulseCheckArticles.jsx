@@ -34,7 +34,8 @@ const PulseCheckArticles = ({ user, setClickedArticle, setViewInteracted, questi
     return (
         <>
         <NavBar user={user} setViewInteracted={setViewInteracted}/>
-        <h1>welcome to your articles on: {question}</h1>
+        <h1 className="text-3xl font-bold text-center text-white">ON THE PULSE:</h1>
+        <p className="text-center text-white mb-10 mt-6">answering your question, "{question}"</p>
         {pulseCheckArticles.length > 0 && <ArticleBoard user={user} setClickedArticle={setClickedArticle} setViewInteracted={setViewInteracted} articleList={pulseCheckArticles}/>}
         </>
     );
