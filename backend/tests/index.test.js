@@ -1,5 +1,4 @@
 const axios = require('axios');
-const cron = require('node-cron');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
@@ -14,6 +13,10 @@ jest.mock('../recommendUtils', () => ({
   recommendArticles: jest.fn(),
 }));
 
+jest.mock('../index', () => ({
+  detectAIContent: jest.fn(),
+}));
+
 const { scrapeArticle } = require('../scraper');
 const {
   getAllPreferredTopics,
@@ -21,8 +24,10 @@ const {
   findSimilarUsers,
   recommendArticles
 } = require('../recommendUtils');
+const { detectAIContent } = require('../index');
 
-const { fetchAndStoreArticles, fetchAndCacheArticlesByTopics } = require('../index');
+// Adjust the path according to your project structure
+const { fetchAndCacheArticlesByTopics } = require('../index');
 
 jest.mock('axios');
 jest.mock('@prisma/client', () => {
@@ -42,7 +47,12 @@ describe('fetchAndCacheArticlesByTopics', () => {
     jest.clearAllMocks();
   });
 
-  it('should fetch articles, scrape content, and upsert articles', async () => {
+  it('should be defined', () => {
+    console.log(fetchAndCacheArticlesByTopics);
+    expect(fetchAndCacheArticlesByTopics).toBeDefined();
+  });
+
+  it('should fetch articles, scrape content, detect AI content, and upsert articles', async () => {
     const mockArticles = [
       {
         title: 'Test Article 1',
@@ -61,6 +71,7 @@ describe('fetchAndCacheArticlesByTopics', () => {
     });
 
     scrapeArticle.mockResolvedValue('Scraped content');
+    detectAIContent.mockResolvedValue({ realScore: 0.9, fakeScore: 0.1 });
     getAllPreferredTopics.mockResolvedValue(['test']);
     generateFrequencyDictionary.mockReturnValue({ test: 1 });
     findSimilarUsers.mockResolvedValue([]);
@@ -77,6 +88,7 @@ describe('fetchAndCacheArticlesByTopics', () => {
     });
 
     expect(scrapeArticle).toHaveBeenCalledWith('http://example.com/1');
+    expect(detectAIContent).toHaveBeenCalledWith('Scraped content');
 
     expect(prisma.article.upsert).toHaveBeenCalledWith({
       where: { title: 'Test Article 1' },
@@ -89,6 +101,8 @@ describe('fetchAndCacheArticlesByTopics', () => {
         keywords: ['test'],
         publishedAt: new Date('2024-07-25'),
         content: 'Scraped content',
+        realScore: 0.9,
+        fakeScore: 0.1,
       },
     });
   });

@@ -102,6 +102,7 @@ const normalizeWhitespace = (text) => {
  * Replace special characters in the text.
  * @param {string} text - The text with special characters.
  * @returns {string} - The text with special characters replaced.
+ * TODO - error where it is replacing apostrophes with &#8217, &#8211
  */
 const replaceSpecialChars = (text) => {
     return text.replace(/’/g, "'");

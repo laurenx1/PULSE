@@ -14,11 +14,11 @@ bodyParser = require('body-parser');
 
 const { scrapeArticle } = require('./scraper');
 const { getAllPreferredTopics, generateFrequencyDictionary, findSimilarUsers, recommendArticles } = require('./recommendUtils');
-const { updateArticleKeywords} = require('./keywordExtract')
+const { updateArticleKeywords} = require('./keywordExtract');
 const authRoutes = require('./authRoutes');
-const pulsecheckRoutes = require('./pulsecheckRoutes')
-const userActionRoutes = require('./userActionRoutes')
-
+const pulsecheckRoutes = require('./pulsecheckRoutes');
+const userActionRoutes = require('./userActionRoutes');
+const articleEnpointRoutes = require('./articleEndpointRoutes');
 
 const prisma = new PrismaClient();
 const app = express();
@@ -37,11 +37,12 @@ app.use(cors());
 app.use('/auth', authRoutes);
 app.use('/llama3', pulsecheckRoutes);
 app.use('/update', userActionRoutes);
+app.use('/api', articleEnpointRoutes);
 
 
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  // console.log(`Server running on http://localhost:${PORT}`);
 });
 
 
@@ -60,7 +61,7 @@ const fetchAndStoreArticles = async () => {
 
     for (const article of articles) {
       const formattedContent = await scrapeArticle(article.link); // Scrape the content
-
+      const aiScores = await detectAIContent(formattedContent)
       await prisma.article.upsert({
         where: { title: article.title },
         update: {},
@@ -72,6 +73,8 @@ const fetchAndStoreArticles = async () => {
           keywords: article.keywords || [], // Initialize with an empty array if null
           publishedAt: new Date(article.pubDate || Date.now()), // Provide current date if pubDate is missing
           content: formattedContent, // Save the formatted content as an array of paragraphs
+          realScore: aiScores.realScore,
+          fakeScore: aiScores.fakeScore
         },
       });
     }
@@ -81,21 +84,6 @@ const fetchAndStoreArticles = async () => {
   }
 };
 
-
-app.get('/api/articles', async (req, res) => {
-  try {
-    const articles = await prisma.article.findMany({
-      orderBy: {
-        publishedAt: 'desc'
-      },
-      take: 10
-    });
-    res.json(articles);
-  } catch (error) {
-    console.error('Error fetching articles:', error);
-    res.status(500).json({ error: 'Error fetching articles' });
-  }
-});
 
 
 // AI-content detection scoring
@@ -149,61 +137,88 @@ app.post('/api/detect-ai-content-hf', async (req, res) => {
 });
 
 
-// view liked or saved articles 
-app.get('/api/interactedArticles', async (req, res) => {
-  const { type, userId } = req.query; // type can be 'liked' or 'saved'
+
+const truncateText = (contentString) => {
+  const words = contentString.split(/\s+/);
+  if (words.length > 300) {
+    return words.slice(0, 300).join(" ");
+  }
+  return contentString;
+}
+
+
+// Function for AI-generated content detection scoring
+const detectAIContent = async (content) => {
+  const contentString = content.join(' ');
+  const removeNewLineContent = contentString.replace(/[\r\n]+/g, " ");
+
+  const truncatedContent = truncateText(removeNewLineContent);
+
+  console.log(truncatedContent);
+  const hfApiKey = process.env.HF_API_KEY;
+  if (!content) {
+      throw new Error('Content is required.');
+  }
 
   try {
-      const user = await prisma.user.findUnique({
-          where: { id: parseInt(userId) },
-          include: { interactions: true },
-      });
+      const response = await axios.post(
+          "https://api-inference.huggingface.co/models/openai-community/roberta-base-openai-detector",
+          { inputs: truncatedContent },
+          {
+              headers: {
+                  'Authorization': `Bearer ${hfApiKey}`,
+                  'Content-Type': 'application/json',
+              },
+          }
+      );
 
-      if (!user) {
-          return res.status(404).json({ error: 'User not found' });
-      }
+      const realScore = response.data[0][0].score;
+      const fakeScore = response.data[0][1].score;
 
-      const articleIds = user[type] || [];
-      const articles = await prisma.article.findMany({
-          where: { id: { in: articleIds } },
-          orderBy: { publishedAt: 'desc' },
-      });
-
-      res.json(articles);
+      return { realScore, fakeScore };
   } catch (error) {
-      console.error(`Error fetching ${type} articles:`, error);
-      res.status(500).json({ error: `Error fetching ${type} articles` });
+      console.error('Error detecting AI content:', error);
+      throw new Error('Error detecting AI content');
   }
-});
+};
+
+
+
 
 
 // Function to fetch title of most recent articles for each topic 
 // @TODO: filter out null values
 const getMostRecentArticlesByKeywords = async (keywords, limit = 2) => {
+  // Lowercase the keywords for case-insensitive search
+  const lowercasedKeywords = keywords.map(k => k.toLowerCase());
+
+  // Fetch articles with keywords in a single query
+  const articles = await prisma.article.findMany({
+    where: {
+      OR: lowercasedKeywords.map(keyword => ({
+        keywords: {
+          has: keyword
+        }
+      }))
+    },
+    orderBy: {
+      publishedAt: 'desc'
+    }
+  });
+
+  // Group articles by keyword and limit the number of articles per keyword
   const articlesByKeyword = {};
+  lowercasedKeywords.forEach(keyword => {
+    articlesByKeyword[keyword] = articles
+      .filter(article => article.keywords.includes(keyword))
+      .slice(0, limit)
+      .map(article => article.title);
+  });
 
-  for (const keyword of keywords.map(k => k.toLowerCase())) {
-      const articles = await prisma.article.findMany({
-          where: {
-              keywords: {
-                  has: keyword
-              }
-          },
-          orderBy: {
-              publishedAt: 'desc'
-          },
-          take: limit
-      });
-
-      if (articles.length > 0) {
-          articlesByKeyword[keyword] = articles.map(article => article.title);
-      }
-  }
   return articlesByKeyword;
 };
 
-
-// get article headlines for marquee
+// Get article headlines for marquee
 app.get(`/relevant-articles`, async (req, res) => {
   const { topics } = req.query;
 
@@ -220,6 +235,8 @@ app.get(`/relevant-articles`, async (req, res) => {
     res.status(500).json({ error: 'Error fetching headlines' });
   }
 });
+
+
 
 
 // fetch and cache articles based on the topics in this frequency dictionary
@@ -242,6 +259,7 @@ const fetchAndCacheArticlesByTopics = async (topics, limit = 3) => {
 
       for (const article of topicArticles) {
         const formattedContent = await scrapeArticle(article.link); // Scrape the content
+        const aiScores = await detectAIContent(formattedContent);
 
         await prisma.article.upsert({
           where: { title: article.title },
@@ -254,6 +272,8 @@ const fetchAndCacheArticlesByTopics = async (topics, limit = 3) => {
             keywords: article.keywords || [],
             publishedAt: new Date(article.pubDate || Date.now()),
             content: formattedContent, // Save the formatted content as an array of paragraphs
+            realScore: aiScores.realScore,
+            fakeScore: aiScores.fakeScore,
           },
         });
       }
@@ -263,6 +283,11 @@ const fetchAndCacheArticlesByTopics = async (topics, limit = 3) => {
   }
   updateArticleKeywords(); // ensure all article's keywords fields are non-empty
   console.log('Articles fetched and cached successfully.');
+};
+
+module.exports = {
+  fetchAndCacheArticlesByTopics,
+  detectAIContent
 };
 
 
@@ -297,36 +322,6 @@ const scheduleArticleFetching = () => {
 
 scheduleArticleFetching();
 
-
-// create API endpoint to get recommended articles. 
-// @TODO: build bigger user base for dev purposes. 
-app.get('/api/recommendations/:userId', async (req, res) => {
-  const targetUserId = parseInt(req.params.userId);
-  const similarityThreshold = 0; // adjust later
-  try {
-    const targetUser = await prisma.user.findUnique({
-      where: { id: targetUserId },
-      include: { interactions: true }
-    }); 
-
-    const allUsers = await prisma.user.findMany({ include: { interactions: true } });
-    const allArticles = await prisma.article.findMany({ 
-      orderBy: {
-        publishedAt: 'desc'
-      },
-      // take: 200
-     });
-
-    const similarUsers = findSimilarUsers(targetUser, allUsers, similarityThreshold);
-    const recommendedArticles = recommendArticles(targetUser, similarUsers, allArticles);
-
-    res.json(recommendedArticles);
-  } catch (error) {
-    console.error('Error generating recommendations:', error);
-    res.status(500).json({ error: 'Error generating recommendations' });
-  }
-
-});
 
 
 
