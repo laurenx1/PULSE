@@ -189,30 +189,36 @@ const detectAIContent = async (content) => {
 // Function to fetch title of most recent articles for each topic 
 // @TODO: filter out null values
 const getMostRecentArticlesByKeywords = async (keywords, limit = 2) => {
+  // Lowercase the keywords for case-insensitive search
+  const lowercasedKeywords = keywords.map(k => k.toLowerCase());
+
+  // Fetch articles with keywords in a single query
+  const articles = await prisma.article.findMany({
+    where: {
+      OR: lowercasedKeywords.map(keyword => ({
+        keywords: {
+          has: keyword
+        }
+      }))
+    },
+    orderBy: {
+      publishedAt: 'desc'
+    }
+  });
+
+  // Group articles by keyword and limit the number of articles per keyword
   const articlesByKeyword = {};
+  lowercasedKeywords.forEach(keyword => {
+    articlesByKeyword[keyword] = articles
+      .filter(article => article.keywords.includes(keyword))
+      .slice(0, limit)
+      .map(article => article.title);
+  });
 
-  for (const keyword of keywords.map(k => k.toLowerCase())) {
-      const articles = await prisma.article.findMany({
-          where: {
-              keywords: {
-                  has: keyword
-              }
-          },
-          orderBy: {
-              publishedAt: 'desc'
-          },
-          take: limit
-      });
-
-      if (articles.length > 0) {
-          articlesByKeyword[keyword] = articles.map(article => article.title);
-      }
-  }
   return articlesByKeyword;
 };
 
-
-// get article headlines for marquee
+// Get article headlines for marquee
 app.get(`/relevant-articles`, async (req, res) => {
   const { topics } = req.query;
 
@@ -229,7 +235,6 @@ app.get(`/relevant-articles`, async (req, res) => {
     res.status(500).json({ error: 'Error fetching headlines' });
   }
 });
-
 
 
 

@@ -21,7 +21,7 @@ const ArticleScrape = ({ article }) => {
     return (
         <div className="max-w-3xl mx-auto p-4">
             <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center text-green-500">
+                <div className="flex items-center text-success">
                     <span className="text-lg">{article.realScore === 0 ? "NO SCORE CALCULATED" : (article.realScore * 100).toFixed(4) + "% Real"}</span>
                 </div>
                 <div className="flex text-red-500">

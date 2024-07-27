@@ -8,28 +8,39 @@ const Marquee = ({ user }) => {
     const [loading, setLoading] = useState(true); // State to track loading status
     const marqueeTopics = user.preferredTopics;
 
-    useEffect(() => {
-        const fetchHeadlinesForMarquee = async () => {
-            const topicsForHeadlines = removeStopwordsFromArray(marqueeTopics); 
-            try {
-                const response = await axios.get(import.meta.env.VITE_BACKEND_URL + `/relevant-articles`, {
-                    params: {
-                        topics: topicsForHeadlines
-                    }
-                });
-                setHeadlines(Object.values(response.data) || []);
-                setLoading(false); // Set loading to false once data is fetched
-            } catch (error) {
-                console.error('Error fetching headlines for marquee.');
-                setLoading(false); // Set loading to false in case of an error
-            }
-        };
+    const fetchHeadlinesForMarquee = async () => {
+        const topicsForHeadlines = removeStopwordsFromArray(marqueeTopics);
+        try {
+            const response = await axios.get(import.meta.env.VITE_BACKEND_URL + `/relevant-articles`, {
+                params: {
+                    topics: topicsForHeadlines
+                }
+            });
+            setHeadlines(Object.values(response.data) || []);
+            setLoading(false); // Set loading to false once data is fetched
+        } catch (error) {
+            console.error('Error fetching headlines for marquee.');
+            setLoading(false); // Set loading to false in case of an error 
+        }
+    };
 
-        fetchHeadlinesForMarquee(); 
-    }, [user.preferredTopics, user]);
-    
+    useEffect(() => {
+        // Initial fetch
+        fetchHeadlinesForMarquee();
+
+        // Set interval to fetch headlines every 100 seconds
+        const intervalId = setInterval(fetchHeadlinesForMarquee, 100000);
+
+        // Clear interval on component unmount
+        return () => clearInterval(intervalId);
+    }, [marqueeTopics]);
+
     if (loading) {
-        return <div className="marquee">Loading headlines...</div>; // Display a loading message or spinner
+        return <div className="marquee">
+            <div className="marquee-content">
+                Loading headlines...
+            </div>
+            </div>; // Display a loading message or spinner
     }
 
     return (

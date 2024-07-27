@@ -11,7 +11,14 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const router = express.Router();
 
-// gets top articles from the database -> takes the last 10 added 
+/**
+ * GET /articles
+ * Fetches the top 10 most recently published articles from the database.
+ * 
+ * @route GET /articles
+ * @returns {Object[]} 200 - An array of article objects sorted by publication date.
+ * @returns {Object} 500 - Internal server error message.
+ */
 router.get('/articles', async (req, res) => {
     try {
       const articles = await prisma.article.findMany({
@@ -25,46 +32,67 @@ router.get('/articles', async (req, res) => {
       console.error('Error fetching articles:', error);
       res.status(500).json({ error: 'Error fetching articles' });
     }
-});
+  });
+  
 
 
-
-// gets liked or saved articles, depending on type provided
-router.get('/interactedArticles', async (req, res) => {
+  /**
+   * GET /interactedArticles
+   * Fetches articles that a user has either liked or saved, based on the provided type.
+   * 
+   * @route GET /interactedArticles
+   * @param {string} type - The type of interaction ('liked' or 'saved').
+   * @param {string} userId - The ID of the user.
+   * @returns {Object[]} 200 - An array of interacted article objects sorted by publication date.
+   * @returns {Object} 404 - User not found error message.
+   * @returns {Object} 500 - Internal server error message.
+   */
+  router.get('/interactedArticles', async (req, res) => {
     const { type, userId } = req.query; // type can be 'liked' or 'saved'
   
     try {
-        const user = await prisma.user.findUnique({
-            where: { id: parseInt(userId) },
-            include: { interactions: true },
-        });
+      const user = await prisma.user.findUnique({
+        where: { id: parseInt(userId) },
+        include: { interactions: true },
+      });
   
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
   
-        const articleIds = user[type] || [];
-        const articles = await prisma.article.findMany({
-            where: { id: { in: articleIds } },
-            orderBy: { publishedAt: 'desc' },
-        });
+      const articleIds = user[type] || [];
+      const articles = await prisma.article.findMany({
+        where: { id: { in: articleIds } },
+        orderBy: { publishedAt: 'desc' },
+      });
   
-        res.json(articles);
+      res.json(articles);
     } catch (error) {
-        console.error(`Error fetching ${type} articles:`, error);
-        res.status(500).json({ error: `Error fetching ${type} articles` });
+      console.error(`Error fetching ${type} articles:`, error);
+      res.status(500).json({ error: `Error fetching ${type} articles` });
     }
-});
+  });
+  
 
 
-router.get('/recommendations/:userId', async (req, res) => {
+  /**
+   * GET /recommendations/:userId
+   * Generates article recommendations for a user based on collaborative filtering.
+   * 
+   * @route GET /recommendations/:userId
+   * @param {number} userId - The ID of the user to generate recommendations for.
+   * @returns {Object[]} 200 - An array of recommended article objects.
+   * @returns {Object} 500 - Internal server error message.
+   */
+  router.get('/recommendations/:userId', async (req, res) => {
     const targetUserId = parseInt(req.params.userId);
-    const similarityThreshold = 0; // adjust later
+    const similarityThreshold = 0; // Adjust later
+  
     try {
       const targetUser = await prisma.user.findUnique({
         where: { id: targetUserId },
         include: { interactions: true }
-      }); 
+      });
   
       const allUsers = await prisma.user.findMany({ include: { interactions: true } });
       const allArticles = await prisma.article.findMany({ 
@@ -72,7 +100,7 @@ router.get('/recommendations/:userId', async (req, res) => {
           publishedAt: 'desc'
         },
         // take: 200
-       });
+      });
   
       const similarUsers = findSimilarUsers(targetUser, allUsers, similarityThreshold);
       const recommendedArticles = recommendArticles(targetUser, similarUsers, allArticles);
@@ -82,10 +110,20 @@ router.get('/recommendations/:userId', async (req, res) => {
       console.error('Error generating recommendations:', error);
       res.status(500).json({ error: 'Error generating recommendations' });
     }
-  
   });
+  
 
-
+  
+  /**
+   * GET /pulsecheck/articles
+   * Fetches articles related to a set of keywords for PULSECHECK queries.
+   * 
+   * @route GET /pulsecheck/articles
+   * @param {string[]} pulseCheckKeywords - An array of keywords to search articles for.
+   * @returns {Object[]} 200 - An array of article objects matching the keywords.
+   * @returns {Object} 400 - Keywords are required error message.
+   * @returns {Object} 500 - Internal server error message.
+   */
   router.get('/pulsecheck/articles', async (req, res) => {
     // Get the pulseCheckKeywords query parameter, which is expected to be an array
     const pulseCheckKeywords = req.query.pulseCheckKeywords;
@@ -94,18 +132,17 @@ router.get('/recommendations/:userId', async (req, res) => {
     const keywords = Array.isArray(pulseCheckKeywords) ? pulseCheckKeywords : [];
   
     if (keywords.length === 0) {
-        return res.status(400).json({ error: 'Keywords are required' });
+      return res.status(400).json({ error: 'Keywords are required' });
     }
   
     try {
-        // Fetch articles based on the keywords array
-        const articles = await fetchPulseCheckArticles(keywords);
-        res.json(articles);
+      // Fetch articles based on the keywords array
+      const articles = await fetchPulseCheckArticles(keywords);
+      res.json(articles);
     } catch (error) {
-        console.error('Error fetching pulsecheck articles:', error);
-        res.status(500).json({ error: 'Error fetching pulsecheck articles' });
+      console.error('Error fetching pulsecheck articles:', error);
+      res.status(500).json({ error: 'Error fetching pulsecheck articles' });
     }
   });
-
-
-module.exports = router;
+  
+  module.exports = router;

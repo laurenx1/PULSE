@@ -75,10 +75,11 @@ const FeaturedStories = ({ user, setClickedArticle, setViewInteracted }) => {
                         <div className="flex justify-between">
                             <div>
                                 <h2 className="text-3xl font-bold">{firstArticle.title}</h2>
+                                <h3 className="text-3xl font-bold">{firstArticle.author}</h3>
                                 <p>{truncateText(firstArticle.description, 50)}</p>
                             </div>
                             <div className="text-right">
-                                <p className="text-success">{firstArticle.realScore.toFixed(4) * 100}% Real Content Score</p>
+                                <p className="text-success">{firstArticle.realScore === 0 ? "NO SCORE CALCULATED" : (firstArticle.realScore * 100).toFixed(4) + "% Real Content Score"}</p>
                             </div>
                         </div>
                     </div>

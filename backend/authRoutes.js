@@ -9,7 +9,17 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const router = express.Router();
 
-// Register a new user
+/**
+ * POST /register
+ * Registers a new user by hashing their password and storing their information in the database.
+ * 
+ * @route POST /register
+ * @param {string} email - The email of the new user.
+ * @param {string} username - The username of the new user.
+ * @param {string} password - The plaintext password of the new user.
+ * @returns {Object} 200 - The newly created user object.
+ * @returns {Object} 500 - Internal server error message.
+ */
 router.post('/register', async (req, res) => {
   const { email, username, password } = req.body;
 
@@ -31,7 +41,20 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Login an existing user
+
+
+/**
+ * POST /login
+ * Logs in an existing user by verifying their email and password.
+ * 
+ * @route POST /login
+ * @param {string} email - The email of the user attempting to log in.
+ * @param {string} password - The plaintext password of the user.
+ * @returns {Object} 200 - The logged-in user object.
+ * @returns {Object} 401 - Invalid credentials error message.
+ * @returns {Object} 404 - User not found error message.
+ * @returns {Object} 500 - Internal server error message.
+ */
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -55,7 +78,18 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Login user with Google
+
+
+/**
+ * POST /google-login
+ * Logs in a user with their Google account by verifying the provided token.
+ * If the user does not exist in the database, a new user record is created.
+ * 
+ * @route POST /google-login
+ * @param {string} token - The ID token provided by Google.
+ * @returns {Object} 200 - The logged-in or newly created user object.
+ * @returns {Object} 500 - Internal server error message.
+ */
 router.post('/google-login', async (req, res) => {
   const { token } = req.body;
 

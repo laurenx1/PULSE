@@ -39,24 +39,37 @@ const UserProfile = ({ user, setViewInteracted, clickedArticle, setClickedArticl
                     <div className="rounded-full bg-gray-700 w-16 h-16"></div>
                     <h2 className="text-4xl font-bold ml-4">{username}'s Profile</h2>
                 </div>
-                <div className="bg-gray-800 rounded-lg p-4 mb-8" onClick={handleLastRead}>
-                    <h3 className="text-xl font-bold text-pink-500 mb-2">LAST READ</h3>
-                    <h4 className="text-2xl font-bold mb-2">{lastRead.title}</h4>
-                    <p className="text-green-400 mb-2">• No AI generated content</p>
-                    <p className="text-white-400">{lastRead.creator}</p>
-                    <p className="text-gray-400">{truncateText(lastRead.description, 50)}</p>
-                </div>
-                <div className="bg-gradient-to-r from-[#2E008E] via-[#7042D2] to-[#FCC188] rounded-lg p-4 mb-8">
+
+
+                
+                    <div
+                        className="bg-gradient-to-r from-pink-500 to-purple-500 p-6 rounded-lg cursor-pointer hover:opacity-60 mb-4"
+                        onClick={handleLastRead}
+                    >
+                        <div className="flex justify-between">
+                            <div>
+                                <p>LAST READ</p>
+                                <h2 className="text-3xl font-bold">{lastRead.title}</h2>
+                                <h3 className="text-3xl font-bold">{lastRead.author}</h3>
+                                <p>{truncateText(lastRead.description, 50)}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-success">{lastRead.realScore.toFixed(4) * 100}% Real Content Score</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                <div className="bg-transparent rounded-lg p-4 mb-8">
                     <h3 className="text-lg font-bold mb-4">YOUR PULSE POINTS</h3>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-6 gap-4">
                         {selectedTopics.map(topic => (
-                            <button key={topic} className="bg-black text-white p-4 rounded-lg text-center hover:opacity-50">{topic}</button>
+                            <button key={topic} className="bg-black outline outline-white text-white p-10 rounded-lg text-center hover:opacity-50">{topic}</button>
                         ))}
                     </div>
                 </div>
                 <div className="flex space-x-4">
-                    <button className="btn btn-primary bg-[#EB73CB] rounded-lg px-4 py-2" onClick={handleSelectTopics}>Edit your interests</button>
-                    <button className="btn btn-primary bg-[#EB73CB] rounded-lg px-4 py-2" onClick={handleLastAsked}>See updates on your most recently asked question</button>
+                    <button className="btn btn-secondary rounded-lg px-4 py-2" onClick={handleSelectTopics}>Edit your interests</button>
+                    <button className="btn btn-secondary rounded-lg px-4 py-2" onClick={handleLastAsked}>See updates on your most recently asked question</button>
                 </div>
             </div>
             <Marquee user={user}/>
