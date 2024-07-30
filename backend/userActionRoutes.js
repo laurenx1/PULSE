@@ -1,5 +1,5 @@
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
+const {PrismaClient} = require('@prisma/client');
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -13,49 +13,49 @@ const router = express.Router();
  * @returns {Object} Updated user information
  */
 router.patch('/users/:id', async (req, res) => {
-    const { id } = req.params;
-    const { preferredTopics, lastRead } = req.body;
+  const {id} = req.params;
+  const {preferredTopics, lastRead} = req.body;
 
-    if (!id) {
-        return res.status(400).json({ error: 'User ID is required' });
+  if (!id) {
+    return res.status(400).json({error: 'User ID is required'});
+  }
+
+  const userId = parseInt(id);
+  if (isNaN(userId)) {
+    return res.status(400).json({error: 'Invalid user ID'});
+  }
+
+  try {
+    const data = {};
+
+    if (preferredTopics !== undefined) {
+      if (!Array.isArray(preferredTopics)) {
+        return res.status(400).json({error: 'preferredTopics should be an array'});
+      }
+      data.preferredTopics = preferredTopics;
     }
 
-    const userId = parseInt(id);
-    if (isNaN(userId)) {
-        return res.status(400).json({ error: 'Invalid user ID' });
+    if (lastRead !== undefined) {
+      data.lastRead = lastRead;
     }
 
-    try {
-        const data = {};
+    const user = await prisma.user.update({
+      where: {id: userId},
+      data,
+    });
 
-        if (preferredTopics !== undefined) {
-            if (!Array.isArray(preferredTopics)) {
-                return res.status(400).json({ error: 'preferredTopics should be an array' });
-            }
-            data.preferredTopics = preferredTopics;
-        }
+    res.status(200).json({message: 'User updated successfully!', user});
+  } catch (error) {
+    console.error('Error updating user:', error);
 
-        if (lastRead !== undefined) {
-            data.lastRead = lastRead;
-        }
-
-        const user = await prisma.user.update({
-            where: { id: userId },
-            data,
-        });
-
-        res.status(200).json({ message: 'User updated successfully!', user });
-    } catch (error) {
-        console.error('Error updating user:', error);
-
-        if (error.code === 'P2025') { // Prisma specific error code for record not found
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        res.status(500).json({ error: 'Failed to update user.' });
+    if (error.code === 'P2025') {
+      // Prisma specific error code for record not found
+      return res.status(404).json({error: 'User not found'});
     }
+
+    res.status(500).json({error: 'Failed to update user.'});
+  }
 });
-
 
 /**
  * @route POST /api/articles/:articleId/like
@@ -65,44 +65,44 @@ router.patch('/users/:id', async (req, res) => {
  * @returns {Object} Success message
  */
 router.post('/articles/:articleId/like', async (req, res) => {
-    const { articleId } = req.params;
-    const { userId } = req.body;
+  const {articleId} = req.params;
+  const {userId} = req.body;
 
-    try {
-        // Update the likes count in the Article model
-        await prisma.article.update({
-            where: { id: parseInt(articleId) },
-            data: {
-                likes: {
-                    increment: 1,
-                },
-            },
-        });
+  try {
+    // Update the likes count in the Article model
+    await prisma.article.update({
+      where: {id: parseInt(articleId)},
+      data: {
+        likes: {
+          increment: 1,
+        },
+      },
+    });
 
-        // Update the liked articles in the User model
-        await prisma.user.update({
-            where: { id: parseInt(userId) },
-            data: {
-                liked: {
-                    push: parseInt(articleId),
-                },
-            },
-        });
+    // Update the liked articles in the User model
+    await prisma.user.update({
+      where: {id: parseInt(userId)},
+      data: {
+        liked: {
+          push: parseInt(articleId),
+        },
+      },
+    });
 
-        // Create an interaction
-        await prisma.interaction.create({
-            data: {
-                userId: parseInt(userId),
-                articleId: parseInt(articleId),
-                liked: true,
-            },
-        });
+    // Create an interaction
+    await prisma.interaction.create({
+      data: {
+        userId: parseInt(userId),
+        articleId: parseInt(articleId),
+        liked: true,
+      },
+    });
 
-        res.status(200).json({ message: 'Article liked successfully!' });
-    } catch (error) {
-        console.error('Error liking article:', error);
-        res.status(500).json({ error: 'Error liking article' });
-    }
+    res.status(200).json({message: 'Article liked successfully!'});
+  } catch (error) {
+    console.error('Error liking article:', error);
+    res.status(500).json({error: 'Error liking article'});
+  }
 });
 
 /**
@@ -113,44 +113,44 @@ router.post('/articles/:articleId/like', async (req, res) => {
  * @returns {Object} Success message
  */
 router.post('/articles/:articleId/save', async (req, res) => {
-    const { articleId } = req.params;
-    const { userId } = req.body;
+  const {articleId} = req.params;
+  const {userId} = req.body;
 
-    try {
-        // Update the saves count in the Article model
-        await prisma.article.update({
-            where: { id: parseInt(articleId) },
-            data: {
-                saves: {
-                    increment: 1,
-                },
-            },
-        });
+  try {
+    // Update the saves count in the Article model
+    await prisma.article.update({
+      where: {id: parseInt(articleId)},
+      data: {
+        saves: {
+          increment: 1,
+        },
+      },
+    });
 
-        // Update the saved articles in the User model
-        await prisma.user.update({
-            where: { id: parseInt(userId) },
-            data: {
-                saved: {
-                    push: parseInt(articleId),
-                },
-            },
-        });
+    // Update the saved articles in the User model
+    await prisma.user.update({
+      where: {id: parseInt(userId)},
+      data: {
+        saved: {
+          push: parseInt(articleId),
+        },
+      },
+    });
 
-        // Create an interaction
-        await prisma.interaction.create({
-            data: {
-                userId: parseInt(userId),
-                articleId: parseInt(articleId),
-                saved: true,
-            },
-        });
+    // Create an interaction
+    await prisma.interaction.create({
+      data: {
+        userId: parseInt(userId),
+        articleId: parseInt(articleId),
+        saved: true,
+      },
+    });
 
-        res.status(200).json({ message: 'Article saved successfully!' });
-    } catch (error) {
-        console.error('Error saving article:', error);
-        res.status(500).json({ error: 'Error saving article' });
-    }
+    res.status(200).json({message: 'Article saved successfully!'});
+  } catch (error) {
+    console.error('Error saving article:', error);
+    res.status(500).json({error: 'Error saving article'});
+  }
 });
 
 module.exports = router;

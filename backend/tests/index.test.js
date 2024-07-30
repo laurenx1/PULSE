@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { PrismaClient } = require('@prisma/client');
+const {PrismaClient} = require('@prisma/client');
 const prisma = new PrismaClient();
 
 jest.mock('../scraper', () => ({
@@ -17,17 +17,17 @@ jest.mock('../index', () => ({
   detectAIContent: jest.fn(),
 }));
 
-const { scrapeArticle } = require('../scraper');
+const {scrapeArticle} = require('../scraper');
 const {
   getAllPreferredTopics,
   generateFrequencyDictionary,
   findSimilarUsers,
-  recommendArticles
+  recommendArticles,
 } = require('../recommendUtils');
-const { detectAIContent } = require('../index');
+const {detectAIContent} = require('../index');
 
 // Adjust the path according to your project structure
-const { fetchAndCacheArticlesByTopics } = require('../index');
+const {fetchAndCacheArticlesByTopics} = require('../index');
 
 jest.mock('axios');
 jest.mock('@prisma/client', () => {
@@ -71,9 +71,9 @@ describe('fetchAndCacheArticlesByTopics', () => {
     });
 
     scrapeArticle.mockResolvedValue('Scraped content');
-    detectAIContent.mockResolvedValue({ realScore: 0.9, fakeScore: 0.1 });
+    detectAIContent.mockResolvedValue({realScore: 0.9, fakeScore: 0.1});
     getAllPreferredTopics.mockResolvedValue(['test']);
-    generateFrequencyDictionary.mockReturnValue({ test: 1 });
+    generateFrequencyDictionary.mockReturnValue({test: 1});
     findSimilarUsers.mockResolvedValue([]);
     recommendArticles.mockResolvedValue([]);
 
@@ -91,7 +91,7 @@ describe('fetchAndCacheArticlesByTopics', () => {
     expect(detectAIContent).toHaveBeenCalledWith('Scraped content');
 
     expect(prisma.article.upsert).toHaveBeenCalledWith({
-      where: { title: 'Test Article 1' },
+      where: {title: 'Test Article 1'},
       update: {},
       create: {
         title: 'Test Article 1',
@@ -115,4 +115,3 @@ describe('fetchAndCacheArticlesByTopics', () => {
     expect(prisma.article.upsert).not.toHaveBeenCalled();
   });
 });
-

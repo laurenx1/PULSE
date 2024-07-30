@@ -1,7 +1,6 @@
 /* manualScraping.js */
 /* This script processes articles with empty content fields by scraping and updating them. */
 
-
 // Utility function to implement retry logic
 const retry = async (fn, retries = 3, delay = 1000) => {
   for (let attempt = 0; attempt < retries; attempt++) {
@@ -36,24 +35,28 @@ const fetchArticlesWithEmptyContent = async (offset, limit) => {
 };
 
 // Function to update content for a single article
-const updateArticleContent = async (article) => {
+const updateArticleContent = async article => {
   try {
     const formattedContent = await scrapeArticle(article.url); // Scrape and clean content
 
     // Retry updating article content with up to 3 attempts
-    await retry(() => prisma.article.update({
-      where: { id: article.id },
-      data: {
-        content: formattedContent, // Ensure content is an array of strings
-      },
-    }), 3, 2000); // 3 retries with 2-second delay between retries
+    await retry(
+      () =>
+        prisma.article.update({
+          where: {id: article.id},
+          data: {
+            content: formattedContent, // Ensure content is an array of strings
+          },
+        }),
+      3,
+      2000,
+    ); // 3 retries with 2-second delay between retries
 
     console.log(`Updated content for article ID ${article.id}`);
   } catch (error) {
     console.error(`Error updating content for article ID ${article.id}:`, error);
   }
 };
-
 
 const BATCH_SIZE = 100;
 

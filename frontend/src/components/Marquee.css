@@ -5,7 +5,7 @@
   box-sizing: border-box;
   width: 100%;
   height: 100px;
-  background: linear-gradient(to right, #00FA9A, #1E90FF); /*Change to desired background color */
+  background: linear-gradient(to right, #00fa9a, #1e90ff); /*Change to desired background color */
   color: #000; /* Change to desired text color */
   display: flex;
   align-items: center;
