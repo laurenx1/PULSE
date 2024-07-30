@@ -26,6 +26,10 @@ const NavBar = ({user, setViewInteracted}) => {
     navigate(`/profile/${user.id}`);
   };
 
+  const handleSignOut = () => {
+    navigate(`/`)
+  }
+
   return (
     <header className="flex items-center justify-between mb-8 ">
       <h1 className="text-3xl font-bold text-white">PULSE</h1>
@@ -57,6 +61,11 @@ const NavBar = ({user, setViewInteracted}) => {
         </button>
         <button className="btn text-white text-xl hover:text-gray-300 bg-transparent hover:bg-transparent">
           About Us
+        </button>
+        <button className='btn text-white hover:text-gray-300 bg-transparent hover:bg-transparent'
+        onClick={handleSignOut}
+        >
+          Sign Out
         </button>
       </nav>
     </header>
