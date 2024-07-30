@@ -5,7 +5,13 @@ import Marquee from './Marquee';
 import {handleArticleClick} from '../utils/utils';
 import {truncateText} from '../utils/textUtils';
 
-const UserProfile = ({user, setViewInteracted, clickedArticle, setClickedArticle, topics}) => {
+const UserProfile = ({
+  user,
+  setViewInteracted,
+  clickedArticle,
+  setClickedArticle,
+  topics,
+}) => {
   const navigate = useNavigate();
 
   const {username, preferredTopics} = user;
@@ -70,10 +76,14 @@ const UserProfile = ({user, setViewInteracted, clickedArticle, setClickedArticle
           </div>
         </div>
         <div className="flex space-x-4">
-          <button className="btn btn-secondary rounded-lg px-4 py-2" onClick={handleSelectTopics}>
+          <button
+            className="btn btn-secondary rounded-lg px-4 py-2"
+            onClick={handleSelectTopics}>
             Edit your interests
           </button>
-          <button className="btn btn-secondary rounded-lg px-4 py-2" onClick={handleLastAsked}>
+          <button
+            className="btn btn-secondary rounded-lg px-4 py-2"
+            onClick={handleLastAsked}>
             See updates on your most recently asked question
           </button>
         </div>

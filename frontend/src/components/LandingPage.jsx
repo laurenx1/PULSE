@@ -12,7 +12,8 @@ const LandingPage = () => {
     <div
       className="flex justify-center items-center h-screen"
       style={{
-        background: 'linear-gradient(135deg, #FCC188, #AE7AB2, #7042D2, #2E008E)',
+        background:
+          'linear-gradient(135deg, #FCC188, #AE7AB2, #7042D2, #2E008E)',
         color: 'white',
         textAlign: 'center',
         padding: '0 20px',
@@ -20,7 +21,10 @@ const LandingPage = () => {
       <div className="container mx-auto">
         <h1 className="text-5xl font-bold mb-4">PULSE</h1>
         <p className="text-xl mb-4">Navigate the Now.</p>
-        <button className="btn btn-custom" style={{}} onClick={handleShowSignIn}>
+        <button
+          className="btn btn-custom"
+          style={{}}
+          onClick={handleShowSignIn}>
           Sign In/Log In
         </button>
       </div>

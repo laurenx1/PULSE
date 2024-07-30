@@ -3,7 +3,12 @@ import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import NavBar from './NavBar';
 
-const PulseCheck = ({user, setViewInteracted, setQuestion, setQuestionKeywords}) => {
+const PulseCheck = ({
+  user,
+  setViewInteracted,
+  setQuestion,
+  setQuestionKeywords,
+}) => {
   const navigate = useNavigate();
   const [prompt, setPrompt] = useState('');
   const [questions, setQuestions] = useState([]);
@@ -39,7 +44,8 @@ const PulseCheck = ({user, setViewInteracted, setQuestion, setQuestionKeywords})
         <h2 className="font-bold">Welcome to PULSECHECK,</h2>
         <h3>
           {' '}
-          a place that prompts you to think critically and specifically about the news you read.
+          a place that prompts you to think critically and specifically about
+          the news you read.
         </h3>
         <form onSubmit={handleSubmit} className="flex mt-8">
           <input

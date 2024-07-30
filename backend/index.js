@@ -12,18 +12,18 @@ const natural = require('natural');
 const stopword = require('stopword');
 bodyParser = require('body-parser');
 
-const {scrapeArticle} = require('./scraper');
+const {scrapeArticle} = require('./utils/scraper');
 const {
   getAllPreferredTopics,
   generateFrequencyDictionary,
   findSimilarUsers,
   recommendArticles,
-} = require('./recommendUtils');
-const {updateArticleKeywords} = require('./keywordExtract');
-const authRoutes = require('./authRoutes');
-const pulsecheckRoutes = require('./pulsecheckRoutes');
-const userActionRoutes = require('./userActionRoutes');
-const articleEnpointRoutes = require('./articleEndpointRoutes');
+} = require('./utils/recommendUtils');
+const {updateArticleKeywords} = require('./utils/keywordExtract');
+const authRoutes = require('./routes/authRoutes');
+const pulsecheckRoutes = require('./routes/pulsecheckRoutes');
+const userActionRoutes = require('./routes/userActionRoutes');
+const articleRoutes = require('./routes/articleRoutes');
 
 const prisma = new PrismaClient();
 const app = express();
@@ -40,48 +40,11 @@ app.use(cors());
 app.use('/auth', authRoutes);
 app.use('/llama3', pulsecheckRoutes);
 app.use('/update', userActionRoutes);
-app.use('/api', articleEnpointRoutes);
+app.use('/api', articleRoutes);
 
 app.listen(PORT, () => {
   // console.log(`Server running on http://localhost:${PORT}`);
 });
-
-const fetchAndStoreArticles = async () => {
-  const apiKey = process.env.NEWS_API_KEY;
-  try {
-    const response = await axios.get('https://newsdata.io/api/1/latest?', {
-      params: {
-        apikey: apiKey,
-        q: 'breaking',
-        country: 'us',
-      },
-    });
-    const articles = response.data.results || [];
-
-    for (const article of articles) {
-      const formattedContent = await scrapeArticle(article.link); // Scrape the content
-      const aiScores = await detectAIContent(formattedContent);
-      await prisma.article.upsert({
-        where: {title: article.title},
-        update: {},
-        create: {
-          title: article.title,
-          description: article.description || 'No description available',
-          author: article.creator || [], // Initialize with an empty array if null
-          url: article.link,
-          keywords: article.keywords || [], // Initialize with an empty array if null
-          publishedAt: new Date(article.pubDate || Date.now()), // Provide current date if pubDate is missing
-          content: formattedContent, // Save the formatted content as an array of paragraphs
-          realScore: aiScores.realScore,
-          fakeScore: aiScores.fakeScore,
-        },
-      });
-    }
-    console.log('Articles fetched and stored successfully.');
-  } catch (error) {
-    console.error('Error fetching and storing articles:', error);
-  }
-};
 
 // AI-content detection scoring
 app.post('/api/detect-ai-content-hf', async (req, res) => {
@@ -99,7 +62,10 @@ app.post('/api/detect-ai-content-hf', async (req, res) => {
 
     // Check if the scores are already calculated
     if (article && article.realScore !== 0.0 && article.fakeScore !== 0.0) {
-      return res.json({realScore: article.realScore, fakeScore: article.fakeScore});
+      return res.json({
+        realScore: article.realScore,
+        fakeScore: article.fakeScore,
+      });
     }
 
     // If scores are not present, calculate them using Hugging Face API
@@ -176,6 +142,8 @@ const detectAIContent = async content => {
   }
 };
 
+module.exports = {detectAIContent};
+
 // Function to fetch title of most recent articles for each topic
 // @TODO: filter out null values
 const getMostRecentArticlesByKeywords = async (keywords, limit = 2) => {
@@ -225,89 +193,3 @@ app.get(`/relevant-articles`, async (req, res) => {
     res.status(500).json({error: 'Error fetching headlines'});
   }
 });
-
-// fetch and cache articles based on the topics in this frequency dictionary
-const fetchAndCacheArticlesByTopics = async (topics, limit = 3) => {
-  const apiKey = process.env.NEWS_API_KEY;
-  const articles = [];
-
-  for (const topic of topics) {
-    try {
-      const response = await axios.get('https://newsdata.io/api/1/latest?', {
-        params: {
-          apikey: apiKey,
-          q: topic,
-          country: 'us',
-        },
-      });
-
-      const topicArticles = response.data.results || [];
-      articles.push(...topicArticles.slice(0, limit)); // Limit articles per topic
-
-      for (const article of topicArticles) {
-        const formattedContent = await scrapeArticle(article.link); // Scrape the content
-        const aiScores = await detectAIContent(formattedContent);
-
-        await prisma.article.upsert({
-          where: {title: article.title},
-          update: {},
-          create: {
-            title: article.title,
-            description: article.description || 'No description available',
-            author: article.creator || [],
-            url: article.link,
-            keywords: article.keywords || [],
-            publishedAt: new Date(article.pubDate || Date.now()),
-            content: formattedContent, // Save the formatted content as an array of paragraphs
-            realScore: aiScores.realScore,
-            fakeScore: aiScores.fakeScore,
-          },
-        });
-      }
-    } catch (error) {
-      console.error(`Error fetching articles for topic ${topic}:`, error);
-    }
-  }
-  updateArticleKeywords(); // ensure all article's keywords fields are non-empty
-  console.log('Articles fetched and cached successfully.');
-};
-
-module.exports = {
-  fetchAndCacheArticlesByTopics,
-  detectAIContent,
-};
-
-// cron job to fetch and cache articles
-const scheduleArticleFetching = () => {
-  // Schedule the article fetching and caching to run every 30 minutes
-  cron.schedule('*/30 * * * *', async () => {
-    // Fetch and store the latest articles
-    await fetchAndStoreArticles();
-
-    // Retrieve all user preferred topics
-    const preferredTopics = await getAllPreferredTopics();
-    // Generate a frequency dictionary for the preferred topics
-    const frequencyDict = generateFrequencyDictionary(preferredTopics);
-    const sortedTopics = Object.keys(frequencyDict).sort(
-      (a, b) => frequencyDict[b] - frequencyDict[a],
-    );
-    const topNTopics = sortedTopics.slice(0, 5);
-    // Fetch and cache articles for the top 5 topics
-    await fetchAndCacheArticlesByTopics(topNTopics);
-  });
-
-  // Immediately fetch and store the latest articles
-  fetchAndStoreArticles();
-  (async () => {
-    const preferredTopics = await getAllPreferredTopics();
-    const frequencyDict = generateFrequencyDictionary(preferredTopics);
-    const sortedTopics = Object.keys(frequencyDict).sort(
-      (a, b) => frequencyDict[b] - frequencyDict[a],
-    );
-    const topNTopics = sortedTopics.slice(0, 5);
-
-    await fetchAndCacheArticlesByTopics(topNTopics);
-  })();
-};
-
-scheduleArticleFetching();

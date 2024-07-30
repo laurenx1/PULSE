@@ -54,7 +54,10 @@ const updateArticleContent = async article => {
 
     console.log(`Updated content for article ID ${article.id}`);
   } catch (error) {
-    console.error(`Error updating content for article ID ${article.id}:`, error);
+    console.error(
+      `Error updating content for article ID ${article.id}:`,
+      error,
+    );
   }
 };
 

@@ -11,11 +11,14 @@ const Marquee = ({user}) => {
   const fetchHeadlinesForMarquee = async () => {
     const topicsForHeadlines = removeStopwordsFromArray(marqueeTopics);
     try {
-      const response = await axios.get(import.meta.env.VITE_BACKEND_URL + `/relevant-articles`, {
-        params: {
-          topics: topicsForHeadlines,
+      const response = await axios.get(
+        import.meta.env.VITE_BACKEND_URL + `/relevant-articles`,
+        {
+          params: {
+            topics: topicsForHeadlines,
+          },
         },
-      });
+      );
       setHeadlines(Object.values(response.data) || []);
       setLoading(false); // Set loading to false once data is fetched
     } catch (error) {

@@ -38,7 +38,8 @@ router.post('/generate-pulsecheck-response', async (req, res) => {
       max_tokens: 200,
     });
 
-    const llamaRes = response.choices[0].message?.content || "I didn't understand.";
+    const llamaRes =
+      response.choices[0].message?.content || "I didn't understand.";
     console.log(llamaRes);
 
     // Define a regular expression to match questions and keywords
@@ -52,7 +53,9 @@ router.post('/generate-pulsecheck-response', async (req, res) => {
     // Iterate over matches and extract questions and keywords
     while ((match = questionRegex.exec(relevantText)) !== null) {
       const question = match[1].trim();
-      const keywords = match[2].split(',').map(keyword => keyword.trim().replace(/"/g, ''));
+      const keywords = match[2]
+        .split(',')
+        .map(keyword => keyword.trim().replace(/"/g, ''));
       results.push({
         question: question,
         keywords: keywords,

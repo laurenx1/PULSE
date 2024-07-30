@@ -60,7 +60,9 @@ export const removeStopwordsFromArray = wordArray => {
       .join(' ');
   };
 
-  const slightlyProcessedWordArray = wordArray.map(phrase => removeStopwordsFromPhrase(phrase));
+  const slightlyProcessedWordArray = wordArray.map(phrase =>
+    removeStopwordsFromPhrase(phrase),
+  );
 
   const processedWordArray = tokenizeArray(slightlyProcessedWordArray);
 

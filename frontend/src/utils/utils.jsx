@@ -3,7 +3,12 @@ import {useNavigate} from 'react-router-dom';
 import {truncateText} from './textUtils';
 
 // Function to fetch article content
-export const fetchArticleContent = async (setContent, article, setError, setLoading) => {
+export const fetchArticleContent = async (
+  setContent,
+  article,
+  setError,
+  setLoading,
+) => {
   try {
     setContent(article.content);
   } catch (error) {
@@ -15,11 +20,19 @@ export const fetchArticleContent = async (setContent, article, setError, setLoad
 };
 
 // Function to open the article that the user clicks on
-export const handleArticleClick = async (user, article, setClickedArticle, navigate) => {
+export const handleArticleClick = async (
+  user,
+  article,
+  setClickedArticle,
+  navigate,
+) => {
   try {
-    await axios.patch(import.meta.env.VITE_BACKEND_URL + `/update/users/${user.id}`, {
-      lastRead: article,
-    });
+    await axios.patch(
+      import.meta.env.VITE_BACKEND_URL + `/update/users/${user.id}`,
+      {
+        lastRead: article,
+      },
+    );
   } catch (error) {
     console.error('Error updating last read article:', error);
   }

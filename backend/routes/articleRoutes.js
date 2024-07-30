@@ -3,8 +3,14 @@ const bcrypt = require('bcrypt');
 const {PrismaClient} = require('@prisma/client');
 const {OAuth2Client} = require('google-auth-library');
 
-const {findSimilarUsers, recommendArticles} = require('./recommendUtils');
-const {getCombinations, fetchPulseCheckArticles} = require('./pulseCheckUtils');
+const {
+  findSimilarUsers,
+  recommendArticles,
+} = require('../utils/recommendUtils');
+const {
+  getCombinations,
+  fetchPulseCheckArticles,
+} = require('../utils/pulseCheckUtils');
 const prisma = new PrismaClient();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -89,7 +95,9 @@ router.get('/recommendations/:userId', async (req, res) => {
       include: {interactions: true},
     });
 
-    const allUsers = await prisma.user.findMany({include: {interactions: true}});
+    const allUsers = await prisma.user.findMany({
+      include: {interactions: true},
+    });
     const allArticles = await prisma.article.findMany({
       orderBy: {
         publishedAt: 'desc',
@@ -97,8 +105,16 @@ router.get('/recommendations/:userId', async (req, res) => {
       // take: 200
     });
 
-    const similarUsers = findSimilarUsers(targetUser, allUsers, similarityThreshold);
-    const recommendedArticles = recommendArticles(targetUser, similarUsers, allArticles);
+    const similarUsers = findSimilarUsers(
+      targetUser,
+      allUsers,
+      similarityThreshold,
+    );
+    const recommendedArticles = recommendArticles(
+      targetUser,
+      similarUsers,
+      allArticles,
+    );
 
     res.json(recommendedArticles);
   } catch (error) {

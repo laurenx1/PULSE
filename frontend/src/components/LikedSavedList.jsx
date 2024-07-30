@@ -6,7 +6,12 @@ import {handleArticleClick} from '../utils/utils';
 import {truncateText} from '../utils/textUtils';
 import ArticleBoard from './ArticleBoard';
 
-const LikedSavedList = ({user, viewInteracted, setViewInteracted, setClickedArticle}) => {
+const LikedSavedList = ({
+  user,
+  viewInteracted,
+  setViewInteracted,
+  setClickedArticle,
+}) => {
   const navigate = useNavigate();
   const [contentType, setContentType] = useState('');
   const [articles, setArticles] = useState([]);

@@ -79,13 +79,16 @@ describe('fetchAndCacheArticlesByTopics', () => {
 
     await fetchAndCacheArticlesByTopics(['test']);
 
-    expect(axios.get).toHaveBeenCalledWith('https://newsdata.io/api/1/latest?', {
-      params: {
-        apikey: process.env.NEWS_API_KEY,
-        q: 'test',
-        country: 'us',
+    expect(axios.get).toHaveBeenCalledWith(
+      'https://newsdata.io/api/1/latest?',
+      {
+        params: {
+          apikey: process.env.NEWS_API_KEY,
+          q: 'test',
+          country: 'us',
+        },
       },
-    });
+    );
 
     expect(scrapeArticle).toHaveBeenCalledWith('http://example.com/1');
     expect(detectAIContent).toHaveBeenCalledWith('Scraped content');
@@ -110,7 +113,9 @@ describe('fetchAndCacheArticlesByTopics', () => {
   it('should handle errors gracefully', async () => {
     axios.get.mockRejectedValue(new Error('API error'));
 
-    await expect(fetchAndCacheArticlesByTopics(['test'])).resolves.not.toThrow();
+    await expect(
+      fetchAndCacheArticlesByTopics(['test']),
+    ).resolves.not.toThrow();
 
     expect(prisma.article.upsert).not.toHaveBeenCalled();
   });

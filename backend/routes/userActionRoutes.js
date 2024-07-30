@@ -30,7 +30,9 @@ router.patch('/users/:id', async (req, res) => {
 
     if (preferredTopics !== undefined) {
       if (!Array.isArray(preferredTopics)) {
-        return res.status(400).json({error: 'preferredTopics should be an array'});
+        return res
+          .status(400)
+          .json({error: 'preferredTopics should be an array'});
       }
       data.preferredTopics = preferredTopics;
     }

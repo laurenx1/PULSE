@@ -42,8 +42,12 @@ const PulseCheckArticles = ({
     <>
       <NavBar user={user} setViewInteracted={setViewInteracted} />
       <div className="pulsating-gradient"></div>
-      <h1 className="text-3xl font-bold text-center text-white">ON THE PULSE:</h1>
-      <p className="text-center text-white mb-10 mt-4">answering your question, "{question}"</p>
+      <h1 className="text-3xl font-bold text-center text-white">
+        ON THE PULSE:
+      </h1>
+      <p className="text-center text-white mb-10 mt-4">
+        answering your question, "{question}"
+      </p>
 
       {pulseCheckArticles.length > 0 && (
         <ArticleBoard

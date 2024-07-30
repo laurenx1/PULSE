@@ -17,9 +17,12 @@ const TopicSelector = ({user, setTopics}) => {
 
   const handleSubmit = async () => {
     try {
-      await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/update/users/${user.id}`, {
-        preferredTopics: selectedTopics,
-      });
+      await axios.patch(
+        `${import.meta.env.VITE_BACKEND_URL}/update/users/${user.id}`,
+        {
+          preferredTopics: selectedTopics,
+        },
+      );
       setTopics(selectedTopics);
       navigate(`/profile/${user.id}`);
     } catch (error) {

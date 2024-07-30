@@ -60,9 +60,12 @@ const SignIn = ({setUser}) => {
   const handleGoogleSuccess = async response => {
     const {credential} = response;
     try {
-      const res = await axios.post(import.meta.env.VITE_BACKEND_URL + '/auth/google-login', {
-        token: credential,
-      });
+      const res = await axios.post(
+        import.meta.env.VITE_BACKEND_URL + '/auth/google-login',
+        {
+          token: credential,
+        },
+      );
       const data = res.data;
       handleVerifiedAccount(data.user);
     } catch (error) {
@@ -79,7 +82,9 @@ const SignIn = ({setUser}) => {
       <form
         className="w-full max-w-sm p-6 bg-base-200 rounded-lg shadow-md"
         onSubmit={handleSubmit}>
-        <h2 className="text-2xl font-bold mb-6">{isSignUp ? 'Sign Up' : 'Log In'}</h2>
+        <h2 className="text-2xl font-bold mb-6">
+          {isSignUp ? 'Sign Up' : 'Log In'}
+        </h2>
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2" htmlFor="email">
             Email:
@@ -106,7 +111,9 @@ const SignIn = ({setUser}) => {
         </div>
         {isSignUp && (
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2" htmlFor="username">
+            <label
+              className="block text-sm font-medium mb-2"
+              htmlFor="username">
               Username:
             </label>
             <input
@@ -124,7 +131,9 @@ const SignIn = ({setUser}) => {
         <p
           className="text-sm mt-4 text-center cursor-pointer"
           onClick={() => setIsSignUp(!isSignUp)}>
-          {isSignUp ? 'Already have an account? Log in' : 'Need an account? Sign up'}
+          {isSignUp
+            ? 'Already have an account? Log in'
+            : 'Need an account? Sign up'}
         </p>
       </form>
       <div className="w-full max-w-sm p-6 mt-4 bg-base-200 rounded-lg shadow-md">

@@ -3,7 +3,12 @@ import {useNavigate} from 'react-router-dom';
 import {truncateText} from '../utils/textUtils';
 import {handleArticleClick} from '../utils/utils';
 
-const ArticleBoard = ({user, setClickedArticle, setViewInteracted, articleList}) => {
+const ArticleBoard = ({
+  user,
+  setClickedArticle,
+  setViewInteracted,
+  articleList,
+}) => {
   const navigate = useNavigate();
 
   return (
@@ -13,7 +18,9 @@ const ArticleBoard = ({user, setClickedArticle, setViewInteracted, articleList})
           <div
             key={index}
             className="bg-neutral p-4 rounded-lg text-white cursor-pointer hover:bg-gray-800 hover:scale-105 transition-transform"
-            onClick={() => handleArticleClick(user, article, setClickedArticle, navigate)}>
+            onClick={() =>
+              handleArticleClick(user, article, setClickedArticle, navigate)
+            }>
             <h3 className="text-xl font-bold">{article.title}</h3>
             <p className="text-success">
               {article.realScore === 0

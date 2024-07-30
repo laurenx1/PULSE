@@ -19,7 +19,8 @@ const Story = ({user, clickedArticle, setViewInteracted}) => {
     if (liked) return; // Prevent multiple likes
     try {
       await axios.post(
-        import.meta.env.VITE_BACKEND_URL + `/update/articles/${clickedArticle.id}/like`,
+        import.meta.env.VITE_BACKEND_URL +
+          `/update/articles/${clickedArticle.id}/like`,
         {userId: user.id},
       );
       setLiked(true);
@@ -32,7 +33,8 @@ const Story = ({user, clickedArticle, setViewInteracted}) => {
     if (saved) return; // Prevent multiple saves
     try {
       await axios.post(
-        import.meta.env.VITE_BACKEND_URL + `/update/articles/${clickedArticle.id}/save`,
+        import.meta.env.VITE_BACKEND_URL +
+          `/update/articles/${clickedArticle.id}/save`,
         {userId: user.id},
       );
       setSaved(true);

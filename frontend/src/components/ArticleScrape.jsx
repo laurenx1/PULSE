@@ -14,7 +14,8 @@ const ArticleScrape = ({article}) => {
     fetchArticleContent(setContent, article, setError, setLoading);
   }, [url, content, article.id]);
 
-  if (loading) return <span className="loading loading-spinner text-primary"></span>;
+  if (loading)
+    return <span className="loading loading-spinner text-primary"></span>;
   if (error) return <div>{error}</div>;
 
   return (
@@ -37,7 +38,9 @@ const ArticleScrape = ({article}) => {
       </div>
       <h1 className="text-4xl font-bold my-4">{article.title}</h1>
       <div className="text-sm text-gray-500 mb-4">
-        <span className="mr-4">Author: {article.creator || article.author}</span>
+        <span className="mr-4">
+          Author: {article.creator || article.author}
+        </span>
         <span className="text-[#AE7AB2]">
           Date: {format(new Date(article.pubDate || article.publishedAt), 'PP')}
         </span>
@@ -48,7 +51,9 @@ const ArticleScrape = ({article}) => {
       <div className="space-y-4">
         {content
           .filter(
-            paragraph => paragraph.split(' ').length >= 5 && !paragraph.includes('Your browser is'),
+            paragraph =>
+              paragraph.split(' ').length >= 5 &&
+              !paragraph.includes('Your browser is'),
           )
           .map((paragraph, index) => (
             <p key={index} className="mb-4">

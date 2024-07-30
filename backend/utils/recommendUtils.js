@@ -33,11 +33,21 @@ const generateFrequencyDictionary = topics => {
 
 // calculate a similarity score between 2 users based on common likes, saves and preferredTopics
 const calculateUserSimilarity = (user1, user2) => {
-  const commonLikes = user1.liked.filter(articleId => user2.liked.includes(articleId));
-  const commonSaves = user1.saved.filter(articleId => user2.saved.includes(articleId));
-  const commonSaveToLike = user1.saved.filter(articleId => user2.liked.includes(articleId));
-  const commonLikeToSave = user1.liked.filter(articleId => user2.saved.includes(articleId));
-  const commonTopics = user1.preferredTopics.filter(topic => user2.preferredTopics.includes(topic));
+  const commonLikes = user1.liked.filter(articleId =>
+    user2.liked.includes(articleId),
+  );
+  const commonSaves = user1.saved.filter(articleId =>
+    user2.saved.includes(articleId),
+  );
+  const commonSaveToLike = user1.saved.filter(articleId =>
+    user2.liked.includes(articleId),
+  );
+  const commonLikeToSave = user1.liked.filter(articleId =>
+    user2.saved.includes(articleId),
+  );
+  const commonTopics = user1.preferredTopics.filter(topic =>
+    user2.preferredTopics.includes(topic),
+  );
 
   const weight1 = 3; // Weight for common likes - middle weight because liked is more relevant than topics chosen when setting up profile
   const weight2 = 4; // Weight for common saves - most weight because saved holds gravity
