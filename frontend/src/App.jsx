@@ -44,6 +44,10 @@ function App() {
                     clickedArticle={clickedArticle}
                     setClickedArticle={setClickedArticle}
                     topics={topics}
+                    setQuestion={setQuestion}
+                    question={question}
+                    setQuestionKeywords={setQuestionKeywords}
+                    questionKeywords={questionKeywords}
                   />
                 }
               />

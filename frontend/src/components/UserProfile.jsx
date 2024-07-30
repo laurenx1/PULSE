@@ -11,6 +11,10 @@ const UserProfile = ({
   clickedArticle,
   setClickedArticle,
   topics,
+  setQuestion, 
+  question,
+  setQuestionKeywords,
+  questionKeywords,
 }) => {
   const navigate = useNavigate();
 
@@ -34,6 +38,10 @@ const UserProfile = ({
 
   const handleLastAsked = () => {
     console.log('going to your last asked question!');
+    console.log(user.lastAsked);
+    setQuestion(user.lastAsked);
+    setQuestionKeywords(user.lastAskedKeywords);
+    navigate(`/${user.id}/pulsecheck-articles`);
   };
 
   return (

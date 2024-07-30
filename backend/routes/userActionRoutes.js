@@ -155,4 +155,51 @@ router.post('/articles/:articleId/save', async (req, res) => {
   }
 });
 
+
+router.patch('/:id/update-last-asked', async (req, res) => {
+  const {id} = req.params;
+  const {lastAsked, lastAskedKeywords} = req.body;
+
+  if (!id) {
+    return res.status(400).json({error: 'User ID is required'});
+  }
+
+  const userId = parseInt(id);
+  if (isNaN(userId)) {
+    return res.status(400).json({error: 'Invalid user ID'});
+  }
+
+  if (lastAskedKeywords.length === 0 || lastAsked === '') {
+    return res.status(400).json({ error: 'no questions or keywords provided' });
+  }
+
+  try {
+    const data = {};
+    if (lastAskedKeywords !== undefined) {
+
+      if (!Array.isArray(lastAskedKeywords)) {
+        return res
+          .status(400)
+          .json({error: 'lastAskedKeyWords should be an array'});
+      }
+      data.lastAskedKeywords = lastAskedKeywords;
+    }
+
+    if (lastAsked !== undefined) {
+      data.lastAsked = lastAsked;
+    }
+
+    const user = await prisma.user.update({
+      where: {id: userId},
+      data,
+    });
+
+    console.log(lastAsked);
+    res.status(200).json({message: 'User updated successfully!', user});
+  } catch (error) {
+    console.error('Error updating last asked questions and / or keywords', error);
+  }
+
+});
+
 module.exports = router;

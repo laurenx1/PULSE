@@ -38,6 +38,22 @@ const PulseCheckArticles = ({
     fetchPulseCheckArticles();
   }, [question, questionKeywords]);
 
+  const updateLastAsked = async () => {
+    try {
+      await axios.patch(
+        `${import.meta.env.VITE_BACKEND_URL}/update/${user.id}/update-last-asked`, 
+        {
+          lastAsked: question, 
+          lastAskedKeywords: questionKeywords,
+        }
+      )
+    } catch (error) {
+      console.error('Error updating last read question and keywords')
+    }
+  }
+
+  updateLastAsked();
+
   return (
     <>
       <NavBar user={user} setViewInteracted={setViewInteracted} />
