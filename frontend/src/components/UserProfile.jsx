@@ -15,6 +15,7 @@ const UserProfile = ({
   question,
   setQuestionKeywords,
   questionKeywords,
+  setViewTopic,
 }) => {
   const navigate = useNavigate();
 
@@ -43,6 +44,12 @@ const UserProfile = ({
     setQuestionKeywords(user.lastAskedKeywords);
     navigate(`/${user.id}/pulsecheck-articles`);
   };
+
+  const handleTopicClick = () => {
+    // setViewTopic([topic]);
+    // navigate(`/${user.id}/topic-stories`);
+    console.log('hi');
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 bg-black min-h-screen">
@@ -77,7 +84,8 @@ const UserProfile = ({
             {selectedTopics.map(topic => (
               <button
                 key={topic}
-                className="bg-black outline outline-white text-white p-10 rounded-lg text-center hover:opacity-50">
+                className="bg-black outline outline-white text-white p-10 rounded-lg text-center hover:opacity-50"
+                onClick={handleTopicClick()}>
                 {topic}
               </button>
             ))}

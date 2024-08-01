@@ -1,4 +1,3 @@
-// api.js
 const axios = require('axios');
 
 const predict = async text => {

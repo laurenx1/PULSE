@@ -6,11 +6,11 @@ const {OAuth2Client} = require('google-auth-library');
 const {
   findSimilarUsers,
   recommendArticles,
-} = require('../utils/recommendUtils');
+} = require('../utils/recommendUtils.js');
 const {
   getCombinations,
   fetchPulseCheckArticles,
-} = require('../utils/pulseCheckUtils');
+} = require('../utils/pulseCheckUtils.js');
 const prisma = new PrismaClient();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 

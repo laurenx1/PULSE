@@ -10,6 +10,7 @@ import PulseCheck from './components/PulseCheck';
 import TopicSelector from './components/TopicSelector';
 import LikedSavedList from './components/LikedSavedList';
 import PulseCheckArticles from './components/PulseCheckArticles';
+import TopicStories from './components/TopicStories';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -18,6 +19,7 @@ function App() {
   const [topics, setTopics] = useState([]);
   const [question, setQuestion] = useState('');
   const [questionKeywords, setQuestionKeywords] = useState([]);
+  const [viewTopic, setViewTopic] = useState([]); 
 
   // @TODO: make all margins consisent w wrap
   return (
@@ -48,6 +50,7 @@ function App() {
                     question={question}
                     setQuestionKeywords={setQuestionKeywords}
                     questionKeywords={questionKeywords}
+                    setViewTopic={setViewTopic}
                   />
                 }
               />
@@ -118,6 +121,19 @@ function App() {
                     setViewInteracted={setViewInteracted}
                     question={question}
                     questionKeywords={questionKeywords}
+                  />
+                }
+              />
+            )}
+            {user !== null && (
+              <Route
+                path={`/${user.id}/topic-stories`}
+                element={
+                  <TopicStories
+                    user={user}
+                    setClickedArticle={setClickedArticle}
+                    setViewInteracted={setViewInteracted}
+                    viewTopic={viewTopic}
                   />
                 }
               />

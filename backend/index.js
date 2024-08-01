@@ -12,18 +12,19 @@ const natural = require('natural');
 const stopword = require('stopword');
 bodyParser = require('body-parser');
 
-const {scrapeArticle} = require('./utils/scraper');
+const {scrapeArticle} = require('./utils/scraper.js');
 const {
   getAllPreferredTopics,
   generateFrequencyDictionary,
   findSimilarUsers,
   recommendArticles,
-} = require('./utils/recommendUtils');
-const {updateArticleKeywords} = require('./utils/keywordExtract');
-const authRoutes = require('./routes/authRoutes');
-const pulsecheckRoutes = require('./routes/pulsecheckRoutes');
-const userActionRoutes = require('./routes/userActionRoutes');
-const articleRoutes = require('./routes/articleRoutes');
+} = require('./utils/recommendUtils.js');
+const {updateArticleKeywords} = require('./utils/keywordExtract.js');
+const authRoutes = require('./routes/authRoutes.js');
+const pulsecheckRoutes = require('./routes/pulsecheckRoutes.js');
+const userActionRoutes = require('./routes/userActionRoutes.js');
+const articleRoutes = require('./routes/articleRoutes.js');
+const predictBiasRoute = require('./routes/predictBiasRoutes');
 
 const prisma = new PrismaClient();
 const app = express();
@@ -41,6 +42,8 @@ app.use('/auth', authRoutes);
 app.use('/llama3', pulsecheckRoutes);
 app.use('/update', userActionRoutes);
 app.use('/api', articleRoutes);
+app.use('/bert', predictBiasRoute)
+
 
 app.listen(PORT, () => {
   // console.log(`Server running on http://localhost:${PORT}`);
