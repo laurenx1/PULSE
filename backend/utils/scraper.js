@@ -16,32 +16,24 @@ const parseHTML = html => {
 
     if (char === '<') {
       inTag = true;
-      if (currentText.trim()) {
+      if (currentText.trim() && currentTag === 'p') {
         // Add text content before the tag
-        if (currentTag === 'p') {
-          paragraphs.push(currentText);
-        }
+        paragraphs.push(currentText.trim());
         currentText = '';
       }
       currentTag = '';
     } else if (char === '>') {
       inTag = false;
-      // Check for closing tag
-      if (currentTag.startsWith('/')) {
-        currentTag = currentTag.slice(1); // Remove '/'
-      }
     } else if (inTag) {
-      currentTag += char;
+      currentTag += char.toLowerCase();
     } else {
-      if (currentTag === 'p') {
-        currentText += char;
-      }
+      currentText += char;
     }
   }
 
   // Add the last segment if it was within <p> tags
   if (currentText.trim() && currentTag === 'p') {
-    paragraphs.push(currentText);
+    paragraphs.push(currentText.trim());
   }
 
   return paragraphs;
@@ -78,34 +70,29 @@ const cleanText = content => {
  * @returns {string} - The normalized text.
  */
 const normalizeWhitespace = text => {
-  let result = '';
-  let inWhitespace = false;
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-
-    if (char === ' ' || char === '\n' || char === '\r' || char === '\t') {
-      if (!inWhitespace) {
-        result += ' ';
-        inWhitespace = true;
-      }
-    } else {
-      result += char;
-      inWhitespace = false;
-    }
-  }
-
-  return result.trim();
+  return text.replace(/\s+/g, ' ').trim();
 };
 
 /**
  * Replace special characters in the text.
  * @param {string} text - The text with special characters.
  * @returns {string} - The text with special characters replaced.
- * TODO - error where it is replacing apostrophes with &#8217, &#8211
  */
 const replaceSpecialChars = text => {
-  return text.replace(/’/g, "'");
+  const replacements = {
+    '’': "'",
+    '“': '"',
+    '”': '"',
+    '–': '-',
+    '—': '-',
+    '&nbsp;': ' ',
+    '&amp;': '&',
+    '&quot;': '"',
+    '&lt;': '<',
+    '&gt;': '>'
+    // Add more replacements as needed
+  };
+  return text.replace(/’|“|”|–|—|&nbsp;|&amp;|&quot;|&lt;|&gt;/g, char => replacements[char] || char);
 };
 
 /**
@@ -114,7 +101,7 @@ const replaceSpecialChars = text => {
  * @returns {string} - The text with non-ASCII characters removed.
  */
 const removeNonASCII = text => {
-  return text.replace(/[^\x00-\x7F]+/g, ' ');
+  return text.replace(/[^\x00-\x7F]+/g, '');
 };
 
 /**
@@ -126,8 +113,7 @@ const scrapeArticle = async url => {
   try {
     const response = await axios.get(url, {
       headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
       },
       timeout: 10000, // Timeout after 10 seconds
     });
@@ -140,4 +126,5 @@ const scrapeArticle = async url => {
   }
 };
 
-module.exports = {scrapeArticle};
+module.exports = { scrapeArticle };
+

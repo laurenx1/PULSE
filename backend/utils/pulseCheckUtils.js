@@ -8,6 +8,7 @@ const fetchPulseCheckArticles = async keywords => {
   let articles = [];
 
   // Query the database for articles matching all keywords first, then fewer keywords
+  // @TODO: make sure this is searching in reverse order s.t. it is finding the most recent articles. 
   for (let i = keywords.length; i > 0; i--) {
     const combinations = getCombinations(lowercaseKeywords, i);
     for (const combination of combinations) {
@@ -16,6 +17,7 @@ const fetchPulseCheckArticles = async keywords => {
           has: keyword,
         },
       }));
+
 
       const matchingArticles = await prisma.article.findMany({
         where: {
