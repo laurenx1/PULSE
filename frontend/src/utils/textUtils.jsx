@@ -68,3 +68,23 @@ export const removeStopwordsFromArray = wordArray => {
 
   return processedWordArray;
 };
+
+
+// function to render prediction colors by parsing text
+export const renderPrediction = (prediction) => {
+  const colors = {
+    'left-leaning': 'text-[#1E90FF]',
+    'right-leaning': 'text-red-500',
+    'neutral': 'text-purple-500'
+  };
+
+  return prediction.map(([label, score]) => {
+    const colorClass = colors[label] || '';
+    return (
+      <div key={label} className={`${colorClass} mb-1`}>
+        {label.replace(/-/g, ' ')}: {score.toFixed(4)}%
+      </div>
+    );
+  });
+};
+

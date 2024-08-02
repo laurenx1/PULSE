@@ -3,6 +3,7 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import { fetchArticleContent } from '../utils/utils';
 import './predictModal.css'; // Custom CSS if needed
+import { renderPrediction } from '../utils/textUtils';
 
 const ArticleScrape = ({ article }) => {
   const [content, setContent] = useState([]);
@@ -55,6 +56,7 @@ const ArticleScrape = ({ article }) => {
     try {
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/bert/predict`, { text });
       setModalContent(response.data.prediction);
+      console.log(modalContent);
       setIsModalVisible(true);
     } catch (error) {
       console.error('Error sending highlighted text:', error);
@@ -98,7 +100,7 @@ const ArticleScrape = ({ article }) => {
           Date: {format(new Date(article.pubDate || article.publishedAt), 'PP')}
         </span>
       </div>
-      <div className="bg-info p-6 rounded-lg mb-6">
+      <div className="bg-gradient-to-r from-pink-500 to-purple-500 p-6 rounded-lg mb-6">
         <strong>Description:</strong> {article.description}
       </div>
       <div className="space-y-4">
@@ -117,9 +119,9 @@ const ArticleScrape = ({ article }) => {
         {/* Modal */}
         {isModalVisible && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50" ref={modalRef}>
-            <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 md:w-1/3 relative">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-9/12 md:w-1/3 relative">
               <h2 className="text-lg font-bold mb-4">Prediction</h2>
-              <p>{modalContent}</p>
+              <p>{renderPrediction(modalContent)}</p>
               <button
                 onClick={handleCloseModal}
                 className="absolute top-2 right-2 btn btn-sm btn-circle"

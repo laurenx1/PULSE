@@ -1,9 +1,9 @@
-import React, {useEffect, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import Marquee from './Marquee';
-import {handleArticleClick} from '../utils/utils';
-import {truncateText} from '../utils/textUtils';
+import { handleArticleClick } from '../utils/utils';
+import { truncateText } from '../utils/textUtils';
 
 const UserProfile = ({
   user,
@@ -19,7 +19,7 @@ const UserProfile = ({
 }) => {
   const navigate = useNavigate();
 
-  const {username, preferredTopics} = user;
+  const { username, preferredTopics } = user;
   const selectedTopics = topics.length !== 0 ? topics : user.preferredTopics;
 
   /**
@@ -45,10 +45,9 @@ const UserProfile = ({
     navigate(`/${user.id}/pulsecheck-articles`);
   };
 
-  const handleTopicClick = () => {
-    // setViewTopic([topic]);
-    // navigate(`/${user.id}/topic-stories`);
-    console.log('hi');
+  const handleTopicClick = (topic) => {
+    setViewTopic([topic]);
+    navigate(`/${user.id}/topic-stories`);
   }
 
   return (
@@ -85,7 +84,7 @@ const UserProfile = ({
               <button
                 key={topic}
                 className="bg-black outline outline-white text-white p-10 rounded-lg text-center hover:opacity-50"
-                onClick={handleTopicClick()}>
+                onClick={() => handleTopicClick(topic)}>
                 {topic}
               </button>
             ))}
@@ -110,3 +109,4 @@ const UserProfile = ({
 };
 
 export default UserProfile;
+

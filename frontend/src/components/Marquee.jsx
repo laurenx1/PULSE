@@ -19,24 +19,25 @@ const Marquee = ({user}) => {
           },
         },
       );
-      setHeadlines(Object.values(response.data) || []);
+      setHeadlines([...Object.values(response.data)] || []);
       setLoading(false); // Set loading to false once data is fetched
     } catch (error) {
       console.error('Error fetching headlines for marquee.');
       setLoading(false); // Set loading to false in case of an error
     }
   };
+  console.log(headlines);
 
   useEffect(() => {
     // Initial fetch
     fetchHeadlinesForMarquee();
 
     // Set interval to fetch headlines every 100 seconds
-    const intervalId = setInterval(fetchHeadlinesForMarquee, 100000);
+    // const intervalId = setInterval(fetchHeadlinesForMarquee, 100000);
 
     // Clear interval on component unmount
-    return () => clearInterval(intervalId);
-  }, [marqueeTopics]);
+    // return () => clearInterval(intervalId);
+  }, []);
 
   if (loading) {
     return (

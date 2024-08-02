@@ -58,9 +58,9 @@ const LikedSavedList = ({
 
   return (
     <>
+      <NavBar user={user} setViewInteracted={setViewInteracted} />
       <div>
-        <NavBar user={user} setViewInteracted={setViewInteracted} />
-        <h1 className="text-3xl font-bold text-center text-white mb-20">
+        <h1 className="text-3xl font-bold text-center text-white mb-10">
           Your {contentType} articles
         </h1>
       </div>

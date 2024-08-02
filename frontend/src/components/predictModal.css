@@ -8,6 +8,7 @@
     border: 1px solid #ccc;
     z-index: 1000; /* Ensure it's on top of other elements */
     display: block; /* Ensure the modal is visible */
+
   }
   
   .modal-content {

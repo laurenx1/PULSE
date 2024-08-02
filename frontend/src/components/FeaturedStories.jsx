@@ -53,8 +53,8 @@ const FeaturedStories = ({user, setClickedArticle, setViewInteracted}) => {
 
   return (
     <div className="p-6 bg-black text-white space-y-6">
+      <NavBar user={user} setViewInteracted={setViewInteracted} />
       <header>
-        <NavBar user={user} setViewInteracted={setViewInteracted} />
         <h1 className="text-3xl font-bold text-center">FEATURED STORIES</h1>
         <p className="text-center">Your breaking news.</p>
       </header>
