@@ -24,6 +24,8 @@ model User {
   username       String        @unique
   password       String?
   picture        String?
+  lastAsked      String?
+  lastAskedKeywords String[]    @default([])
 }
 
 model Article {
